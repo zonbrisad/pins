@@ -138,22 +138,22 @@ rp_pico = Pinout(
       |         |        |        |      |  |┏━━━━┫     ┣━━━━┓|  |          |        |        |         |
 PWM0 A|UART0 TX |I2C0 SDA|SPI0 RX |GP0   |1 |┃◎   ┗━━━━━┛   ◎┃|40|VBUS      |        |        |         |
 PWM0 B|UART0 RX |I2C0 SCL|SPI0 CSn|GP1   |2 |┃◎ ▩           ◎┃|39|VSYS      |        |        |         |
-      |         |        |        |Ground|3 |┃▣ └─GP25      ▣┃|38|Ground    |        |        |         |
+      |         |        |        |GND   |3 |┃▣ └─GP25      ▣┃|38|GND       |        |        |         |
 PWM1 A|UART0 CTS|I2C1 SDA|SPI0 SCK|GP2   |4 |┃◎  ▒▒▒        ◎┃|37|3v3 En    |        |        |         |
 PWM1 B|UART0 RTS|I2C1 SCL|SPI0 TX |GP3   |5 |┃◎  ▒▒▒        ◎┃|36|3v3 Out   |        |        |         |
 PWM2 A|UART1 TX |I2C0 SDA|SPI0 RX |GP4   |6 |┃◎             ◎┃|35|ADC VRef  |        |        |         |
 PWM2 B|UART1 RX |I2C0 SCL|SPI0 CSn|GP5   |7 |┃◎             ◎┃|34|GP28 / A2 |SPI1 RX |I2C0 SDA|UART0 TX |PWM6 A
-      |         |        |        |Ground|8 |┃▣             ▣┃|33|ADC Ground|        |        |         |
+      |         |        |        |GND   |8 |┃▣             ▣┃|33|ADC GND   |        |        |         |
 PWM3 A|UART1 CTS|I2C1 SDA|SPI0 SCK|GP6   |9 |┃◎   ▓▓▓▓▓▓▓   ◎┃|32|GP27 / A1 |SPI1 TX |I2C1 SCL|UART1 RTS|PWM5 B
 PWM3 B|UART1 RTS|I2C1 SCL|SPI0 TX |GP7   |10|┃◎   ▓▓▓▓▓▓▓   ◎┃|31|GP26 / A0 |SPI1 SCK|I2C1 SDA|UART1 CTS|PWM5 A
 PWM4 A|UART1 TX |I2C0 SDA|SPI1 RX |GP8   |11|┃◎   ▓▓▓▓▓▓▓   ◎┃|30|run       |        |        |         |
 PWM4 B|UART1 RX |I2C0 SCL|SPI1 CSn|GP9   |12|┃◎   ▓▓▓▓▓▓▓   ◎┃|29|GP22      |SPI0 SCK|I2C1 SDA|UART1 CTS|PWM3 A
-      |         |        |        |Ground|13|┃▣             ▣┃|28|Ground    |        |        |         |
+      |         |        |        |GND   |13|┃▣             ▣┃|28|GND       |        |        |         |
 PWM5 A|UART1 CTS|I2C1 SDA|SPI1 SCK|GP10  |14|┃◎             ◎┃|27|GP21      |SPI0 CSn|I2C0 SCL|UART1 RX |PWM2 B
 PWM5 B|UART1 RTS|I2C1 SCL|SPI1 TX |GP11  |15|┃◎             ◎┃|26|GP20      |SPI0 RX |I2C0 SDA|UART1 TX |PWM2 A
 PWM6 A|UART0 TX |I2C0 SDA|SPI1 RX |GP12  |16|┃◎             ◎┃|25|GP19      |SPI0 TX |I2C1 SCL|UART0 RTS|PWM1 B
 PWM6 B|UART0 RX |I2C0 SCL|SPI1 CSn|GP13  |17|┃◎             ◎┃|24|GP18      |SPI0 SCK|I2C1 SDA|UART0 CTS|PWM1 A
-      |         |        |        |Ground|18|┃▣             ▣┃|23|Ground    |        |        |         |
+      |         |        |        |GND   |18|┃▣             ▣┃|23|GND       |        |        |         |
 PWM7 A|UART0 CTS|I2C1 SDA|SPI1 SCK|GP14  |19|┃◎             ◎┃|22|GP17      |SPI0 CSn|I2C0 SCL|UART0 RX |PWM0 B
 PWM7 B|UART0 RTS|I2C1 SCL|SPI1 TX |GP15  |20|┃◎    ◎ ▣ ◎    ◎┃|21|GP16      |SPI0 RX |I2C0 SDA|UART0 TX |PWM0 A
       |         |        |        |      |  |┗━━━━━━━━━━━━━━━┛|  |          |        |        |         |
@@ -185,6 +185,36 @@ arduino_nano = Pinout(
              |         |       |     |GND   |29|┃▣    ◎ ◎ ◎    ◎┃| 2|D0   | PD0  | | RXD   | PCINT16 
              |         |       |     |Vin   |30|┃▣    ◎ ◎ ◎    ◎┃| 1|D1   | PD1  | | TXD   | PCINT17 
              |         |       |     |      |  |┗━━━━━━━━━━━━━━━┛|  |     |      | |       |         
+"""
+)
+arduino_pro_mini = Pinout(
+    board_name = "Arduino Pro Mini",
+    ground_pins = [16, 11, 25, 26],
+    power_pins = [9, 27],
+    adc_pins = (35, 34, 33, 32, 31), 
+    reset_pins = [10],
+    pinout = """
+             | RXD     |       | PD0 |      |28| ━━━━━━┓ ┏━━━━━━ |27|VCC  |      |    |       |         
+             | TXD     |       | PD1 |      |29| ━━━━┓ ┃ ┃ ┏━━━━ |26|GND  |      |    |       |         
+             | DTR     |       |     |      |30| ━━┓ ┃ ┃ ┃ ┃ ┏━━ |25|GND  |      |    |       |         
+             |         |       |     |      |  |┏━━┻━┻━┻━┻━┻━┻━━┓|  |     |      |    |       |         
+             |         |       |     |      |  |┃  ◎ ◎ ◎ ◎ ◎ ◎  ┃|  |     |      |    |       |   
+             |         |       |     |D14   |13|┃◎             ◎┃|12|RAW  | PB1  |    |       |   
+             |         |       |     |D15   |14|┃◎             ◎┃|11|GND  | PB0  |    |       |   
+             |         |       |     |D16   |15|┃◎             ◎┃|10|Reset| PC6  |    |       | PCINT23 
+             |         |       |     |GND   |16|┃◎             ◎┃| 9|VCC  |      |    |       |  
+             |         |       | PD2 |D18   |17|┃◎  ┏━━━━━━ ◎  ◎┃| 8|P    | PC3  | A3 |       | PCINT21 
+             |         |       | PD3 |D19   |18|┃◎  ┃ ┏━━━━ ◎  ◎┃| 7|P    | PC2  | A2 |       | PCINT20 
+             |         |       | PD4 |D20   |19|┃◎  ┃ ┃        ◎┃| 6|P    | PC1  | A1 |       | PCINT19 
+             |         |       | PD5 |D21   |20|┃◎  ┃ ┃        ◎┃| 5|P    | PC0  | A0 |       | PCINT18 
+             |         |       | PD6 |      |21|┃▣  ┃ ┃        ▣┃| 4|P    | PB5  |    | SCK   |         
+     PCINT14 |         |       | PD7 |      |22|┃◎  ┃ ┃        ◎┃| 3|P    | PB4  |    | MISO  | PCINT14 
+             |         |       | PB0 |      |23|┃▣  ┃ ┃        ◎┃| 2|P    | PB3  |    | MOSI  | PCINT16 
+             |         |       | PB1 |      |24|┃▣  ┃ ┃  ◎ ◎ ◎ ◎┃| 1|P    | PB2  |    | SS    | PCINT17 
+             |         |       |     |      |  |┗━━━╋━╋━━┳━┳━┳━━┛|  |     |      |    |       |         
+             |         |  A5   | PC5 |      |  | ━━━┛ ┃  ┃ ┃ ┗━━━|  |     |      | A7 |       |         
+             |         |  A6   | PC4 |      |  | ━━━━━┛  ┃ ┗━━━━━|  |     |      | A6 |       |         
+             |         |       |     |      |  |         ┗━━━━━━━|  |GND  |      |    |       |         
 """
 )
 
@@ -249,7 +279,7 @@ arduino_mega = Pinout(
              |         |       |     |+3.3V |30|┃▣                                    ◎┃|19|D10  | PB4  |      | PWM   | PCINT4 
              |         |       |     |+5V   |31|┃▣                                    ◎┃|18|D9   | PH6  |      | PWM   |  
              |         |       |     |GND   |32|┃▣                                    ◎┃|17|D8   | PH5  |      | PWM   |  
-             |         |       |     |GND   |33|┃▣                                     ┃|  |     |      |      | PWM   |  
+             |         |       |     |GND   |33|┃▣                                     ┃|  |     |      |      |       |  
              |         |       |     |Vin   |34|┃▣            ▓▓▓▓▓▓▓▓▓▓▓             ◎┃|16|D7   | PH4  |      | PWM   |                       
              |         |       |     |      |  |┃             ▓▓▓▓▓▓▓▓▓▓▓             ◎┃|15|D6   | PH3  |      | PWM   | PCINT8
              |         | ADC0  | PF0 |D54   |35|┃◎            ▓▓▓▓▓▓▓▓▓▓▓             ◎┃|14|D5   | PE3  | AIN1 |       |  
@@ -272,7 +302,38 @@ arduino_mega = Pinout(
              |         |       |     |      |  |┃   ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎┃|  |     |      |      |       |  
              |         |       |     |      |  |┃   ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎┃|  |     |      |      |       |  
              |         |       |     |      |  |┗━┓                        ┏━━━━━━━━━━━┛|  |     |      |      |       |         
-             |         |       |     |      |  |  ┗━━━━━━━━━━━━━━━━━━━━━━━━┛           |  |     |      |      |       |         
+             |         |       |     |      |  |  ┗━━━━━━━━━━━━━━━━━━━━━━━━┛           |  |     |      |      |       | 
+""")
+arduino_mega_con = Pinout(
+    board_name = "Arduino Mega connector",
+    ground_pins = [23, 32, 33],
+    power_pins = [30, 31, 34],
+    adc_pins = [], 
+    reset_pins = [29],
+    nc_pins = [27],
+    pinout = """    
+             |         |  |     |     |  |  ┏━━━━┓  |  |     |   |      |   |  
+             |         |  |     | +5V |  |  ┃◎  ◎┃  |  | +5V |   |      |   |  
+             |         |  | PC1 |     |22|  ┃◎  ◎┃  |23|     |   |      |   |  
+             |         |  | PC3 |     |24|  ┃◎  ◎┃  |25|     |   |      |   | 
+             |         |  | PC5 |     |26|  ┃◎  ◎┃  |27|     |   |      |   |  
+             |         |  | PC7 |     |28|  ┃◎  ◎┃  |29|     |   |      |   |  
+             |         |  | PA6 |     |30|  ┃◎  ◎┗━┓ |31|     |   |      |   |  
+             |         |  | PA4 |     |32|  ┃◎  ◎  ┃  |33|     |   |      |   |  
+             |         |  | PA2 |     |34|  ┃◎  ◎  ┃  |35|     |   |      |   |  
+             |         |  | PA0 |     |36|  ┃◎  ◎  ┃  |37|     |   |      |   |  
+             |         |  | PD7 |     |38|  ┃◎  ◎  ┃  |39|     |   |      |   |  
+             |         |  | PG1 |     |40|  ┃◎  ◎  ┃  |41|     |   |      |   |  
+             |         |  | PL7 |     |42|  ┃◎  ◎  ┃  |43|     |   |      |   |  
+             |         |  | PL5 |     |44|  ┃◎  ◎  ┃  |45|     |   |      |   |  
+             |         |  | PL3 |     |46|  ┃◎  ◎  ┃  |47|     |   |      |   |  
+             |         |  | PL1 |     |48|  ┃◎  ◎  ┃  |49|     |   |      |   |  
+             |         |  | PB3 |     |50|  ┃◎  ◎  ┃  |51|     |   |      |   |  
+             |         |  | PB1 |     |52|  ┃◎  ◎  ┃  |53|     |   |      |   |  
+             |         |  |     | GND |  |  ┃◎  ◎  ┃  |  | GND |   |      |   |  
+             |         |  |     |     |  |  ┃    ┏━┛  |  |     |   |      |   |  
+             |         |  |     |     |  |  ┃    ┃    |  |     |   |      |   |  
+             |         |  |     |     |  |  ┗━━━━┛    |  |     |   |      |   |   
 """
 )
 
@@ -285,8 +346,6 @@ arduino_mega = Pinout(
 #         usage(f"Invalid interface \"{label}\"")
 #     return label
 
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(
         prog=App.NAME,
@@ -294,17 +353,22 @@ def main() -> None:
         epilog="",
         add_help=True)
     
+    parser.add_argument("--pro", action="store_true", default=False,
+                        help="Arduino Pro mini")
+    parser.add_argument("--nano", action="store_true", default=False,
+                        help="Arduino nano")
+    parser.add_argument("--uno", action="store_true", default=False,
+                        help="Arduino Uno")
+    parser.add_argument("--mega", action="store_true", default=False,
+                        help="Arduino mega")
+    parser.add_argument("--pico", action="store_true", default=True,
+                        help="Raspberry pi Pico")
     parser.add_argument("--debug", action="store_true", default=False,
                         help="Print debug messages")
-    # parser.add_argument("--help", action="store_true", default=False,
-    #                     help="Print help")
     parser.add_argument("--version", action="version",
                         version=f"{App.NAME} {App.VERSION}",
                         help="Print version information")
     args = parser.parse_args()
-
-    # if args.help:
-    #     parser.print_help()
 
     show_indexes = []
     grid = Table.grid(expand=True)
@@ -313,11 +377,28 @@ def main() -> None:
     opts_pins = True
     opts_hide_gpio = False 
 
+
+    if args.pico:
+        pinout = rp_pico
+
+    if args.pro:
+        pinout = arduino_pro_mini
+
+    if args.nano:
+        pinout = arduino_nano
+
+    if args.uno:
+        pinout = arduino_uno
     
-    pinout = rp_pico
-    pinout = arduino_nano
-    pinout = arduino_uno
-    pinout = arduino_mega
+    if args.mega:
+        pinout = arduino_mega
+    
+    #pinout = None
+    # pinout = rp_pico
+    # pinout = arduino_nano
+    # if args.mega_con:
+    #     pinout = arduino_mega_con
+   
 
     for label in reversed(opts_show):
         grid.add_column(justify="left", style=THEME[label], no_wrap=True)
@@ -346,9 +427,6 @@ def main() -> None:
         grid.add_column(justify="left", style=THEME[label], no_wrap=True)
         show_indexes.append(9 + COLS.index(label))
 
-    # for row in pinout.split():
-    #     grid.add_row(*build_row(row, show_indexes, find=opts_find))
-
     for row in pinout.split():
         grid.add_row(*pinout.build_row(row, show_indexes, find=opts_find))
 
@@ -362,7 +440,6 @@ def main() -> None:
         title=pinout.board_name,
         expand=False,
         style=THEME["panel"]))
-
 
 
 if __name__ == "__main__":
