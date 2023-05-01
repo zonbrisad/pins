@@ -6,7 +6,7 @@
 #
 # File:     ardpins
 # Author:   Peter Malmberg  <peter.malmberg@gmail.com>
-# Org:      __ORGANISTATION__
+# Org:      
 # Date:     2023-04-30
 # License:  
 # Python:   >= 3.0
@@ -23,7 +23,7 @@ import sys
 from rich import print
 from rich.panel import Panel
 from rich.table import Table
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 # Variables ------------------------------------------------------------------
@@ -35,7 +35,7 @@ class App:
     LICENSE = ""
     AUTHOR = "Peter Malmberg"
     EMAIL = "<peter.malmberg@gmail.com>"
-    ORG = "__ORGANISATION__"
+    ORG = ""
     HOME = ""
     ICON = ""
 
@@ -51,6 +51,7 @@ THEME = {
     "panel": "#ffffff on #000000",
     "diagram": "#555555",
     "adc": "#2aa198",
+    "reset": "#2aa198",
     "power": "#dc322f",
     "ground": "#005b66",
     "run": "#df8f8e",
@@ -60,12 +61,14 @@ THEME = {
 
 @dataclass
 class Pinout():
-    board_name: str
-    pinout: str
-    ground_pins: str    
-    power_pins: str
-    adc_pins: str
-    run_pins: str
+    board_name: str = ""
+    pinout: str = ""
+    ground_pins: list[int] = field(default_factory=list)    
+    power_pins: list[int] = field(default_factory=list)
+    adc_pins: list[int] = field(default_factory=list)
+    run_pins: list[int] = field(default_factory=list)
+    reset_pins: list[int] = field(default_factory=list)
+    nc_pins: list[int] = field(default_factory=list)
 
     def is_ground_pin(self, pin):
         return pin in self.ground_pins
@@ -79,12 +82,16 @@ class Pinout():
     def is_run_pin(self, pin):
         return pin in self.run_pins
     
+    def is_reset_pin(self, pin):
+        return pin in self.reset_pins
+    
     def pin_style(self, pin):
         style = THEME["gpio"]
         if self.is_ground_pin(pin): style = THEME["ground"]
         if self.is_power_pin(pin): style = THEME["power"]
         if self.is_adc_pin(pin): style = THEME["adc"]
         if self.is_run_pin(pin): style = THEME["run"]
+        if self.is_reset_pin(pin): style = THEME["reset"]
         return style
     
     def build_row(self,row, show_indexes, find=None):
@@ -108,7 +115,17 @@ class Pinout():
             yield label
 
     def split(self):
-        return [[col.strip() for col in line.split("|")] for line in self.pinout.splitlines()[1:]]
+        
+        r = []
+        for line in self.pinout.splitlines()[1:]:
+            c = []
+            for i, col in enumerate(line.split("|")):
+                if i == 6:
+                    c.append(col)
+                else:
+                    c.append(col.strip())
+            r.append(c)
+        return r
     
 rp_pico = Pinout(
     board_name = "Raspberry Pi Pico",
@@ -145,29 +162,117 @@ PWM7 B|UART0 RTS|I2C1 SCL|SPI1 TX |GP15  |20|┃◎    ◎ ▣ ◎    ◎┃|21|
 
 arduino_nano = Pinout(
     board_name = "Arduino Nano",
-    ground_pins = (29, 4),
+    ground_pins = (29, 4, 23),
     power_pins = (17, 27, 30),
     adc_pins = (35, 34, 33, 32, 31), 
-    run_pins = [], 
+    reset_pins = (3, 28),
     pinout = """
-      |         |        |        |      |  |     ┏━━━━━┓     |  |          |        |        |         |
-      |         |        |        |      |  |┏━━━━┫     ┣━━━━┓|  |          |        |        |         |
-PWM0 A|UART0 TX |I2C0 SDA|SPI0 RX |GP0   |16|┃◎   ┗━━━━━┛   ◎┃|15|VBUS      |        |        |         |
-PWM0 B|UART0 RX |I2C0 SCL|SPI0 CSn|+3V3  |17|┃◎ ▩           ◎┃|14|VSYS      |        |        |         |
-      |         |        |        |Ground|18|┃▣ └─GP25      ▣┃|13|Ground    |        |        |         |
-PWM1 A|UART0 CTS|I2C1 SDA|SPI0 SCK|GP2   |19|┃◎  ▒▒▒        ◎┃|12|3v3 En    |        |        |         |
-PWM1 B|UART0 RTS|I2C1 SCL|SPI0 TX |GP3   |20|┃◎  ▒▒▒        ◎┃|11|3v3 Out   |        |        |         |
-PWM2 A|UART1 TX |I2C0 SDA|SPI0 RX |GP4   |21|┃◎             ◎┃|10|ADC VRef  |        |        |         |
-PWM2 B|UART1 RX |I2C0 SCL|SPI0 CSn|GP5   |22|┃◎             ◎┃| 9|GP28 / A2 |SPI1 RX |I2C0 SDA|UART0 TX |PWM6 A
-      |         |        |        |Ground|23|┃▣             ▣┃| 8|ADC Ground|        |        |         |
-PWM3 A|UART1 CTS|I2C1 SDA|SPI0 SCK|GP6   |24|┃◎   ▓▓▓▓▓▓▓   ◎┃| 7|GP27 / A1 |SPI1 TX |I2C1 SCL|UART1 RTS|PWM5 B
-PWM3 B|UART1 RTS|I2C1 SCL|SPI0 TX |GP7   |25|┃◎   ▓▓▓▓▓▓▓   ◎┃| 6|GP26 / A0 |SPI1 SCK|I2C1 SDA|UART1 CTS|PWM5 A
-PWM4 A|UART1 TX |I2C0 SDA|SPI1 RX |GP8   |26|┃◎   ▓▓▓▓▓▓▓   ◎┃| 5|run       |        |        |         |
-PWM4 B|UART1 RX |I2C0 SCL|SPI1 CSn|+5V   |27|┃◎   ▓▓▓▓▓▓▓   ◎┃| 4|GND      |SPI0 SCK|I2C1 SDA|UART1 CTS|PWM3 A
-      |         |        |        |Reset |28|┃▣             ▣┃| 3|Reset     |        |        |         |
-PWM5 A|UART1 CTS|I2C1 SDA|SPI1 SCK|GND   |29|┃◎    ◎ ▣ ◎    ◎┃| 2|GP21      |SPI0 CSn|I2C0 SCL|UART1 RX |PWM2 B
-PWM7 B|UART0 RTS|I2C1 SCL|SPI1 TX |Vin   |30|┃◎    ◎ ▣ ◎    ◎┃| 1|GP16      |SPI0 RX |I2C0 SDA|UART0 TX |PWM0 A
-      |         |        |        |      |  |┗━━━━━━━━━━━━━━━┛|  |          |        |        |         |
+             |         |       |     |      |  |     ┏━━━━━┓     |  |     |      | |       |         
+             |         |       |     |      |  |┏━━━━┫     ┣━━━━┓|  |     |      | |       |         
+             |  SCK    |       | PB5 |D13   |16|┃◎   ┗━━━━━┛   ◎┃|15|D12  | PB4  | | MISO  | PCINT4  
+             |         |       |     |+3V3  |17|┃▣             ◎┃|14|D11  | PB3  | | MOSI  | PCINT3  
+             |         |       |     |ARef  |18|┃▣             ◎┃|13|D10  | PB2  | | SS    | PCINT2  
+     PCINT8  |         | ADC0  | PC0 |D14   |19|┃◎  ▒▒▒        ◎┃|12|D9   | PB1  | |       | PCINT1  
+     PCINT9  |         | ADC1  | PC1 |D15   |20|┃◎  ▒▒▒        ◎┃|11|D8   | PB0  | |       | PCINT0  
+     PCINT10 |         | ADC2  | PC2 |D16   |21|┃◎             ◎┃|10|D7   | PD7  | AIN1 |   | PCINT23 
+     PCINT11 |         | ADC3  | PC3 |D17   |22|┃◎             ◎┃| 9|D6   | PD6  | AIN0 |   | PCINT22 
+     PCINT12 |  SDA    | ADC4  | PC4 |D18   |23|┃◎             ◎┃| 8|D5   | PD5  | |       | PCINT21 
+     PCINT13 |  SDL    | ADC5  | PC5 |D19   |24|┃◎   ▓▓▓▓▓▓▓   ◎┃| 7|D4   | PD4  | |       | PCINT20 
+             |         | ADC6  |     |D20   |25|┃◎   ▓▓▓▓▓▓▓   ◎┃| 6|D3   | PD3  | | INT1  | PCINT19 
+             |         | ADC7  |     |D21   |26|┃◎   ▓▓▓▓▓▓▓   ◎┃| 5|D2   | PD2  | | INT0  | PCINT18 
+             |         |       |     |+5V   |27|┃▣   ▓▓▓▓▓▓▓   ▣┃| 4|GND  |      | |       |         
+     PCINT14 |         |       | PC6 |Reset |28|┃◎             ◎┃| 3|Reset| PC6  | |       | PCINT14 
+             |         |       |     |GND   |29|┃▣    ◎ ◎ ◎    ◎┃| 2|D0   | PD0  | | RXD   | PCINT16 
+             |         |       |     |Vin   |30|┃▣    ◎ ◎ ◎    ◎┃| 1|D1   | PD1  | | TXD   | PCINT17 
+             |         |       |     |      |  |┗━━━━━━━━━━━━━━━┛|  |     |      | |       |         
+"""
+)
+
+arduino_uno = Pinout(
+    board_name = "Arduino Uno",
+    ground_pins = [15, 23, 24],
+    power_pins = [21, 22, 25],
+    adc_pins = [26, 27, 28, 29, 30, 31], 
+    reset_pins = [20],
+    nc_pins = [19],
+    pinout = """
+             |         |       |     |      |  |                       ┏━━━━━━┓        |  |     |      |      |       |         
+             |         |       |     |      |  |                       ┃      ┃        |  |     |      |      |       |         
+             |         |       |     |      |  |┏━━━━━━━━━━━━━━━━━━━━━━┫      ┣━━━━━━━┓|  |     |      |      |       |      
+             |         |       |     |      |  |┃                      ┃      ┃       ┃|  |     |      |      |       |   
+             |         |       |     |      |  |┃                      ┗━━━━━━┛       ┃|  |     |      |      |       |   
+             |         |       |     |      |  |┃                                     ┃|  |     |      |      |       |                   
+             |         |       |     |      |  |┃                                    ◎┃|18|D19  | PC5  |      |       | PCINT 
+             |         |       |     |      |  |┃                                    ◎┃|17|D18  | PC4  |      |       | PCINT 
+             |         |       |     |      |  |┃                                    ◎┃|16|AREF |      |      |       | 
+             |         |       |     |      |  |┃                                    ▣┃|15|GND  |      |      |       | 
+             |         |       |     | NC   |19|┃◎     ▓▓▓▓▓▓                        ◎┃|14|D13  | PB5  |      |       | PCINT 
+             |         |       |     |IOref |10|┃▣     ▓▓▓▓▓▓                        ◎┃|13|D12  | PB4  |      |       | PCINT 
+     PCINT8  |         |       | PC6 |Reset |20|┃◎     ▓▓▓▓▓▓                        ◎┃|12|D11  | PB3  |      |       | PCINT 
+             |         |       |     |+3.3V |21|┃▣     ▓▓▓▓▓▓                        ◎┃|11|D10  | PB2  |      |       | PCINT 
+             |         |       |     |+5V   |22|┃▣     ▓▓▓▓▓▓                        ◎┃|10|D9   | PB1  |      |       | PCINT 
+             |         |       |     |GND   |23|┃▣     ▓▓▓▓▓▓                        ◎┃| 9|D8   | PB0  |      |       | PCINT 
+             |  SDA    |       |     |GND   |24|┃▣     ▓▓▓▓▓▓                         ┃|  |     |      |      |       |  
+             |  SDL    |       |     |Vin   |25|┃▣     ▓▓▓▓▓▓                        ◎┃| 8|D7   | PD7  |      |       | PCINT 
+             |         |       |     |      |  |┃      ▓▓▓▓▓▓                        ◎┃| 7|D6   | PD6  |      | INT1  | PCINT 
+             |         | ADC0  | PC0 |D14   |26|┃◎     ▓▓▓▓▓▓                        ◎┃| 6|D5   | PD5  |      | INT1  | PCINT 
+             |         | ADC1  | PC1 |D15   |27|┃◎     ▓▓▓▓▓▓                        ◎┃| 5|D4   | PD4  |      | INT0  | PCINT 
+             |         | ADC2  | PC2 |D16   |28|┃◎     ▓▓▓▓▓▓                        ◎┃| 4|D3   | PD3  |      |       | PCINT      
+     PCINT14 |         | ADC3  | PC3 |D17   |29|┃◎     ▓▓▓▓▓▓                        ◎┃| 3|D2   | PD2  |      |       | PCINT 
+             |         | ADC4  | PC4 |D18   |30|┃◎     ▓▓▓▓▓▓                        ◎┃| 2|D1   | PD1  |      | TXD   | PCINT 
+             |         | ADC5  | PC5 |D19   |31|┃◎     ▓▓▓▓▓▓   ◎ ◎ ◎                ◎┃| 1|D0   | PD0  |      | RXD   | PCINT 
+             |         |       |     |      |  |┗━┓             ◎ ◎ ◎      ┏━━━━━━━━━━┛|  |     |      |      |       |         
+             |         |       |     |      |  |  ┗━━━━━━━━━━━━━━━━━━━━━━━━┛    |   |     |      |      |       |         
+"""
+)
+arduino_mega = Pinout(
+    board_name = "Arduino Mega",
+    ground_pins = [23, 32, 33],
+    power_pins = [30, 31, 34],
+    adc_pins = [], 
+    reset_pins = [29],
+    nc_pins = [27],
+    pinout = """
+             |         |       |     |      |  |                        ┏━━━━━━┓        |  |     |      |      |       |         
+             |         |       |     |      |  |                        ┃      ┃        |  |     |      |      |       |         
+             |         |       |     |      |  |┏━━━━━━━━━━━━━━━━━━━━━━━┫      ┣━━━━━━━┓|  |     |      |      |       |      
+             |         |       |     |      |  |┃                       ┃      ┃       ┃|  |     |      |      |       |   
+             |         |       |     |      |  |┃                       ┗━━━━━━┛       ┃|  |     |      |      |       |   
+             |         |       |     |      |  |┃                                      ┃|  |     |      |      |       |       
+             |         |       |     |      |  |┃                                     ◎┃|26|D21  | PD0  |      | SCL   | INT0 
+             |         |       |     |      |  |┃                                     ◎┃|25|D20  | PD1  |      | SDA   | INT1     
+             |         |       |     |      |  |┃                                     ◎┃|24|AREF |      |      |       |  
+             |         |       |     |      |  |┃                                     ◎┃|23|GND  |      |      |       |  
+             |         |       |     | NC   |27|┃◎                                    ◎┃|22|D13  | PB7  | LED  | PWM   | PCINT7 
+             |         |       |     |IOref |28|┃▣                                    ◎┃|21|D12  | PB6  |      | PWM   | PCINT6 
+             |         |       |     |Reset |29|┃◎                                    ◎┃|20|D11  | PB5  |      | PWM   | PCINT5 
+             |         |       |     |+3.3V |30|┃▣                                    ◎┃|19|D10  | PB4  |      | PWM   | PCINT4 
+             |         |       |     |+5V   |31|┃▣                                    ◎┃|18|D9   | PH6  |      | PWM   |  
+             |         |       |     |GND   |32|┃▣                                    ◎┃|17|D8   | PH5  |      | PWM   |  
+             |         |       |     |GND   |33|┃▣                                     ┃|  |     |      |      | PWM   |  
+             |         |       |     |Vin   |34|┃▣            ▓▓▓▓▓▓▓▓▓▓▓             ◎┃|16|D7   | PH4  |      | PWM   |                       
+             |         |       |     |      |  |┃             ▓▓▓▓▓▓▓▓▓▓▓             ◎┃|15|D6   | PH3  |      | PWM   | PCINT8
+             |         | ADC0  | PF0 |D54   |35|┃◎            ▓▓▓▓▓▓▓▓▓▓▓             ◎┃|14|D5   | PE3  | AIN1 |       |  
+             |         | ADC1  | PF1 |D55   |36|┃▣            ▓▓▓▓▓▓▓▓▓▓▓             ◎┃|13|D4   | PG5  |      |       |  
+             |         | ADC2  | PF2 |D56   |37|┃◎            ▓▓▓▓▓▓▓▓▓▓▓             ◎┃|12|D3   | PE5  |      |       | INT5 
+             |         | ADC3  | PF3 |D57   |38|┃▣                                    ◎┃|11|D2   | PE4  |      |       | INT4 
+             |  TCK    | ADC4  | PF4 |D58   |39|┃▣               ◎ ◎ ◎                ◎┃|10|D1   | PE1  |      | TXD0  | PCINT 
+             |  TMS    | ADC5  | PF5 |D59   |41|┃▣               ◎ ◎ ◎                ◎┃| 9|D0   | PE0  |      | RXD0  | PCINT 
+             |  TDO    | ADC6  | PF6 |D60   |42|┃▣                                     ┃|  |     |      |      |       |  
+             |  TDI    | ADC7  | PF7 |D61   |43|┃▣                                    ◎┃| 8|D14  | PJ1  |      | TXD3  | PCINT10 
+             |         |       |     |      |  |┃                                     ◎┃| 7|D15  | PJ0  |      | RXD3  | PCINT9 
+    PCINT16  |         | ADC8  | PK0 |D62   |44|┃◎                                    ◎┃| 6|D16  | PH1  |      | TXD2  |  
+    PCINT17  |         | ADC9  | PK1 |D63   |45|┃◎                                    ◎┃| 5|D17  | PH0  |      | RXD2  |  
+    PCINT18  |         | ADC10 | PK2 |D64   |46|┃◎                                    ◎┃| 4|D18  | PD3  |      | TXD1  | INT3 
+    PCINT19  |         | ADC11 | PK3 |D65   |47|┃◎                                    ◎┃| 3|D19  | PD2  |      | RXD1  | INT2 
+    PCINT20  |         | ADC12 | PK4 |D66   |48|┃◎                                    ◎┃| 2|D20  | PD1  |      | SDA   | INT1      
+    PCINT21  |         | ADC13 | PK5 |D67   |49|┃◎                                    ◎┃| 1|D21  | PD0  |      | SCL   | INT0 
+    PCINT22  |         | ADC14 | PK6 |D68   |50|┃◎                                     ┃|  |     |      |      |       |  
+    PCINT23  |         | ADC15 | PK7 |D69   |51|┃◎                                     ┃|  |     |      |      |       |
+             |         |       |     |      |  |┃   ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎┃|  |     |      |      |       |  
+             |         |       |     |      |  |┃   ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎┃|  |     |      |      |       |  
+             |         |       |     |      |  |┗━┓                        ┏━━━━━━━━━━━┛|  |     |      |      |       |         
+             |         |       |     |      |  |  ┗━━━━━━━━━━━━━━━━━━━━━━━━┛           |  |     |      |      |       |         
 """
 )
 
@@ -208,8 +313,11 @@ def main() -> None:
     opts_pins = True
     opts_hide_gpio = False 
 
-    # pinout = rp_pico
+    
+    pinout = rp_pico
     pinout = arduino_nano
+    pinout = arduino_uno
+    pinout = arduino_mega
 
     for label in reversed(opts_show):
         grid.add_column(justify="left", style=THEME[label], no_wrap=True)
@@ -223,7 +331,7 @@ def main() -> None:
         grid.add_column(justify="right", style=THEME["pins"], no_wrap=True)
         show_indexes += [5]
 
-    grid.add_column(justify="center", no_wrap=True, style=THEME["diagram"])
+    grid.add_column(justify="left", no_wrap=True, style=THEME["diagram"])
     show_indexes += [6]
 
     if opts_pins:
@@ -247,7 +355,7 @@ def main() -> None:
 
     layout = Table.grid(expand=True)
     layout.add_row(grid)
-    layout.add_row("@gadgetoid\nhttps://pico.pinout.xyz")
+#    layout.add_row("@gadgetoid\nhttps://pico.pinout.xyz")
 
     print(Panel(
         layout,
