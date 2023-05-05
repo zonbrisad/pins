@@ -40,7 +40,7 @@ class App:
 
 #COLS = ["spi", "i2c", "uart", "pwm", "pwm"]
 
-COLS = ["spi", "i2c", "uart", "pwm", "xxx"]
+#COLS = ["spi", "i2c", "uart", "pwm", "xxx"]
 
 THEME = {
     "gpio": "#859900",
@@ -65,11 +65,12 @@ THEME = {
     "interrupt":"#666666",
     "timer": "#006B3C",
 }
-
+ 
 
 @dataclass
 class Pinout():
     board_name: str = ""
+    mcu_name: str = ""
     pinout: str = ""
     ground_pins: list[int] = field(default_factory=list)    
     power_pins: list[int] = field(default_factory=list)
@@ -120,16 +121,6 @@ class Pinout():
             if index <= 6:
                 label = label + " "
             yield label
-            #     if index == 4 and row[5] != "":
-            #         label = f'[{self.pin_style(int(row[5]))}]{label}[/]'
-            #     if index == 8 and row[7] != "":
-            #         label = f'[{self.pin_style(int(row[7]))}]{label}[/]'
-            # # Slight fudge for whitespace between labels
-            # if index >= 6:
-            #     label = " " + label
-            # if index <= 5:
-            #     label = label + " "
-            # yield label
 
     def split(self):
         r = []
@@ -145,6 +136,42 @@ class Pinout():
     
 rp_pico = Pinout(
     board_name = "Raspberry Pi Pico",
+    mcu_name = "RP2040",
+    ground_pins = (3, 8, 13, 18, 23, 28, 38),
+    power_pins = (40, 39, 37, 36),
+    adc_pins = (35, 34, 33, 32, 31), 
+    run_pins = [30], 
+#    columns = ["pin", "analog", "pwm", "com", "interrupt"],
+    columns = ["spi", "i2c", "uart", "pwm", "interrupt"],
+    pinout = """
+ |      |         |        |        |      |  |     ┏━━━━━┓     |  |          |     |        |        |         |        
+ |      |         |        |        |      |  |┏━━━━┫     ┣━━━━┓|  |          |     |        |        |         |        
+ |PWM0 A|UART0 TX |I2C0 SDA|SPI0 RX |GP0   |1 |┃◎   ┗━━━━━┛   ◎┃|40|VBUS      |     |        |        |         |        
+ |PWM0 B|UART0 RX |I2C0 SCL|SPI0 CSn|GP1   |2 |┃◎ ▩           ◎┃|39|VSYS      |     |        |        |         |        
+ |      |         |        |        |GND   |3 |┃▣ └─GP25      ▣┃|38|GND       |     |        |        |         |        
+ |PWM1 A|UART0 CTS|I2C1 SDA|SPI0 SCK|GP2   |4 |┃◎  ▒▒▒        ◎┃|37|3v3 En    |     |        |        |         |        
+ |PWM1 B|UART0 RTS|I2C1 SCL|SPI0 TX |GP3   |5 |┃◎  ▒▒▒        ◎┃|36|3v3 Out   |     |        |        |         |        
+ |PWM2 A|UART1 TX |I2C0 SDA|SPI0 RX |GP4   |6 |┃◎             ◎┃|35|          |ADC VRef    |        |        |         |        
+ |PWM2 B|UART1 RX |I2C0 SCL|SPI0 CSn|GP5   |7 |┃◎             ◎┃|34|GP28      |ADC2 |SPI1 RX |I2C0 SDA|UART0 TX |PWM6 A  
+ |      |         |        |        |GND   |8 |┃▣             ▣┃|33|GND       |AGND |        |        |         |        
+ |PWM3 A|UART1 CTS|I2C1 SDA|SPI0 SCK|GP6   |9 |┃◎   ▓▓▓▓▓▓▓   ◎┃|32|GP27      |ADC1 |SPI1 TX |I2C1 SCL|UART1 RTS|PWM5 B  
+ |PWM3 B|UART1 RTS|I2C1 SCL|SPI0 TX |GP7   |10|┃◎   ▓▓▓▓▓▓▓   ◎┃|31|GP26      |ADC0 |SPI1 SCK|I2C1 SDA|UART1 CTS|PWM5 A  
+ |PWM4 A|UART1 TX |I2C0 SDA|SPI1 RX |GP8   |11|┃◎   ▓▓▓▓▓▓▓   ◎┃|30|run       |     |        |        |         |        
+ |PWM4 B|UART1 RX |I2C0 SCL|SPI1 CSn|GP9   |12|┃◎   ▓▓▓▓▓▓▓   ◎┃|29|GP22      |     |SPI0 SCK|I2C1 SDA|UART1 CTS|PWM3 A  
+ |      |         |        |        |GND   |13|┃▣             ▣┃|28|GND       |     |        |        |         |        
+ |PWM5 A|UART1 CTS|I2C1 SDA|SPI1 SCK|GP10  |14|┃◎             ◎┃|27|GP21      |     |SPI0 CSn|I2C0 SCL|UART1 RX |PWM2 B  
+ |PWM5 B|UART1 RTS|I2C1 SCL|SPI1 TX |GP11  |15|┃◎             ◎┃|26|GP20      |     |SPI0 RX |I2C0 SDA|UART1 TX |PWM2 A  
+ |PWM6 A|UART0 TX |I2C0 SDA|SPI1 RX |GP12  |16|┃◎             ◎┃|25|GP19      |     |SPI0 TX |I2C1 SCL|UART0 RTS|PWM1 B  
+ |PWM6 B|UART0 RX |I2C0 SCL|SPI1 CSn|GP13  |17|┃◎             ◎┃|24|GP18      |     |SPI0 SCK|I2C1 SDA|UART0 CTS|PWM1 A  
+ |      |         |        |        |GND   |18|┃▣             ▣┃|23|GND       |     |        |        |         |        
+ |PWM7 A|UART0 CTS|I2C1 SDA|SPI1 SCK|GP14  |19|┃◎             ◎┃|22|GP17      |     |SPI0 CSn|I2C0 SCL|UART0 RX |PWM0 B  
+ |PWM7 B|UART0 RTS|I2C1 SCL|SPI1 TX |GP15  |20|┃◎    ◎ ▣ ◎    ◎┃|21|GP16      |     |SPI0 RX |I2C0 SDA|UART0 TX |PWM0 A  
+ |      |         |        |        |      |  |┗━━━━━━━━━━━━━━━┛|  |          |     |        |        |         |        
+"""
+)
+rp_pico_orig = Pinout(
+    board_name = "Raspberry Pi Pico",
+    mcu_name = "RP2040",
     ground_pins = (3, 8, 13, 18, 23, 28, 38),
     power_pins = (40, 39, 37, 36),
     adc_pins = (35, 34, 33, 32, 31), 
@@ -180,6 +207,7 @@ rp_pico = Pinout(
 
 arduino_pro_mini = Pinout(
     board_name = "Arduino Pro Mini",
+    mcu_name = "ATMega328p",
     ground_pins = [16, 11, 29, 30],
     power_pins = [9, 12, 28],
     reset_pins = [10, 15],
@@ -210,6 +238,7 @@ arduino_pro_mini = Pinout(
 
 arduino_nano = Pinout(
     board_name = "Arduino Nano",
+    mcu_name = "ATMega328p",
     ground_pins = (29, 4, 23),
     power_pins = (17, 27, 30),
     reset_pins = (3, 28),
@@ -238,6 +267,7 @@ arduino_nano = Pinout(
 
 arduino_uno = Pinout(
     board_name = "Arduino Uno",
+    mcu_name = "ATMega328p",
     ground_pins = [15, 23, 24],
     power_pins = [21, 22, 25],
     reset_pins = [20],
@@ -276,6 +306,7 @@ arduino_uno = Pinout(
 )
 arduino_mega = Pinout(
     board_name = "Arduino Mega",
+    mcu_name = "ATMega2560",
     ground_pins = [23, 32, 33],
     power_pins = [30, 31, 34],
     adc_pins = [], 
@@ -324,6 +355,47 @@ arduino_mega = Pinout(
              |        |   |       |     |      |  |┗━┓                        ┏━━━━━━━━━━━┛|  |     |      |    |    |       |         
              |        |   |       |     |      |  |  ┗━━━━━━━━━━━━━━━━━━━━━━━━┛            |  |     |      |    |    |       | 
 """)
+
+
+ET_AVR_STAMP = Pinout(
+    board_name = "ET-AVR Stamp",
+    mcu_name = "ATMega128-16AU",
+    ground_pins = [50],
+    power_pins = [25],
+    adc_pins = [], 
+    reset_pins = [23],
+    nc_pins = [],
+    columns = ["pin", "analog", "timer", "com", "interrupt"],
+    pinout = """
+             |        |   |       |     |     |  |┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓|  |     |      |    |    |       |               
+             | RXD0   |   |       | PE0 |     |26|┃◎          ◎ ◎ ◎ ◎ ◎             ◎┃|25|+5V  |      |    |    |       |  
+             | TXD0   |   |       | PE1 |     |27|┃◎          ◎ ◎ ◎ ◎ ◎             ◎┃|24|PEN  |      |    |    |       |  
+             |        |   | AIN0  | PE2 |     |28|┃◎             ISP                ◎┃|23|Reset|      |    |    |       |  
+             |        |   | AIN1  | PE3 |     |29|┃◎                                ◎┃|22|VREF |      |    |    |       |  
+             |        |   |       | PE4 |     |30|┃◎                                ◎┃|21|     | Pg4  |    |    |       |  
+             |        |   |       | PE5 |     |31|┃◎                                ◎┃|20|     | Pg3  |    |    |       |  
+             |        |   |       | PE6 |     |32|┃◎                                ◎┃|19|     | Pg2  |    |    |       |  
+             |        |   |       | PE7 |     |33|┃◎                                ◎┃|18|     | Pg1  |    |    |       | 
+             |        |   |       | PB0 |     |34|┃◎                                ◎┃|17|     | Pg0  |    |    |       | 
+             |        |   |       | PB1 |     |35|┃◎                                ◎┃|16|     | PF7  | ADC7   |    | TDI   |                      
+             |        |   |       | PB2 |     |36|┃◎            ATMega128           ◎┃|15|     | PF6  | ADC6   |    | TDO   | 
+             |        |   |       | PB3 |     |37|┃◎           ▓▓▓▓▓▓▓▓▓▓▓          ◎┃|14|     | PF5  | ADC5   |    | TMS   | 
+             |        |   |       | PB4 |     |38|┃◎           ▓▓▓▓▓▓▓▓▓▓▓          ◎┃|13|     | PF4  | ADC4   |    | TCK   | 
+             |        |   |       | PB5 |     |39|┃◎           ▓▓▓▓▓▓▓▓▓▓▓          ◎┃|12|     | PF3  | ADC3   |    |       | 
+             |        |   |       | PB6 |     |40|┃◎           ▓▓▓▓▓▓▓▓▓▓▓          ◎┃|11|     | PF2  | ADC2   |    |       | 
+             |        |   |       | PB7 |     |41|┃◎           ▓▓▓▓▓▓▓▓▓▓▓          ◎┃|10|     | PF1  | ADC1   |    |       |  
+             |        |   |       | PD0 |     |42|┃◎                                ◎┃| 9|     | PF0  | ADC0   |    |       |  
+             |        |   |       | PD1 |     |43|┃◎                                ◎┃| 8|     | PA7  |    |    |       |  
+             |        |   |       | PD2 |     |44|┃◎                                ◎┃| 7|     | PA6  |    |    |       |  
+             |        |   |       | PD3 |     |45|┃◎                                ◎┃| 6|     | PA5  |    |    |       |  
+             |        |   |       | PD4 |     |46|┃◎                                ◎┃| 5|     | PA4  |    |    |       |  
+             |        |   |       | PD5 |     |47|┃◎                                ◎┃| 4|     | PA3  |    |    |       |  
+             |        |   |       | PD6 |     |48|┃◎  ┏━━━┓              PortC      ◎┃| 3|     | PA2  |    |    |       |  
+             |        |   |       | PD7 |     |49|┃◎  ┃ ◎ ┃            ◎ ◎ ◎ ◎ ◎    ◎┃| 2|     | PA1  |    |    |       |       
+             |        |   |       |     | GND |50|┃▣  ┗━━━┛            ◎ ◎ ◎ ◎ ◎    ◎┃| 1|     | PA0  |    |    |       |  
+             |        |   |       |     |     |  |┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛|  |     |      |    |    |       |         
+""")
+
 
 arduino_mega_con = Pinout(
     board_name = "Arduino Mega connector",
@@ -404,7 +476,9 @@ def print_pinout(pinout):
 
     layout = Table.grid(expand=True)
     layout.add_row(grid)
-#    layout.add_row("@gadgetoid\nhttps://pico.pinout.xyz")
+    #layout.add_row("@gadgetoid\nhttps://pico.pinout.xyz")
+    layout.add_row(f"MCU: {pinout.mcu_name}")
+
 
     print(Panel(
         layout,
@@ -427,6 +501,8 @@ def main() -> None:
                         help="Arduino Uno")
     parser.add_argument("--mega", action="store_true", default=False,
                         help="Arduino mega")
+    parser.add_argument("--et", action="store_true", default=False,
+                        help="ET-AVR Stamp (ATMega128)")
     parser.add_argument("--pico", action="store_true", default=False,
                         help="Raspberry pi Pico")
     parser.add_argument("--debug", action="store_true", default=False,
@@ -451,6 +527,9 @@ def main() -> None:
     if args.mega:
         print_pinout(arduino_mega)
         print_pinout(arduino_mega_con)
+    
+    if args.et:
+        print_pinout(ET_AVR_STAMP)
 
 if __name__ == "__main__":
     try:
