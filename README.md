@@ -16,10 +16,8 @@
   - [Install](#install)
     - [Download](#download)
     - [Installation](#installation)
-  - [Freqlenty asked Questions](#freqlenty-asked-questions)
-  - [Links](#links)
-  - [Contribute](#contribute)
-  - [License](#license)
+
+
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
