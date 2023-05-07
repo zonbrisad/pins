@@ -20,23 +20,21 @@
   - [Links](#links)
   - [Contribute](#contribute)
   - [License](#license)
-  - [Some examples, remove after creation](#some-examples-remove-after-creation)
-- [The largest heading](#the-largest-heading)
-  - [The second largest heading](#the-second-largest-heading)
-          - [The smallest heading](#the-smallest-heading)
-  - [Tables](#tables)
-  - [List](#list)
-  - [Task list](#task-list)
-  - [Colapsed section](#colapsed-section)
-      - [We can hide anything, even code!](#we-can-hide-anything-even-code)
-  - [Links](#links-1)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## About
 Make connector pinouts available in the terminal window.
 
+Pins is based on code by:
+@gadgetoid
+https://pico.pinout.xyz
+
+## Examples
+
 ![xx][nano]
+
+![xx][uno]
 
 ## Requirements
 - Python 3
@@ -60,15 +58,6 @@ $ git clone https://github.com/zonbrisad/pins.git
 
 
 ## ToDo
-
-
-## Links
-
-
-## Contribute
-
-
-## License 
 
 
 ## Links

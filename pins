@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 # ----------------------------------------------------------------------------
 #
-# show arduinopins at shell
+# Present PCB module pinouts on the terminal
 #
-# File:     ardpins
+# File:     pins
 # Author:   Peter Malmberg  <peter.malmberg@gmail.com>
 # Org:      
 # Date:     2023-04-30
@@ -28,9 +28,9 @@ from dataclasses import dataclass, field
 # Variables ------------------------------------------------------------------
 
 class App:
-    NAME = "ardpins"
-    VERSION = "0.10"
-    DESCRIPTION = "show arduinopins at shell"
+    NAME = "pins"
+    VERSION = "0.20"
+    DESCRIPTION = "Present PCB pinouts at terminal"
     LICENSE = ""
     AUTHOR = "Peter Malmberg"
     EMAIL = "<peter.malmberg@gmail.com>"
@@ -42,8 +42,15 @@ class App:
 version_info=f"""\
 {App.NAME} {App.VERSION}
 
+{App.NAME} is i program for presenting PCB pinouts in a terminal window.
 
+Developed by:
+{App.AUTHOR}
+https://github.com/zonbrisad/pins
 
+Based on code by: 
+@gadgetoid
+https://pico.pinout.xyz
 """
 
 THEME = {
@@ -640,7 +647,6 @@ def print_pinout(pinout):
 
     layout = Table.grid(expand=True)
     layout.add_row(grid)
-    #layout.add_row("@gadgetoid\nhttps://pico.pinout.xyz")
     layout.add_row(f"MCU: {pinout.mcu_name}")
 
 
@@ -677,10 +683,12 @@ def main() -> None:
                         help="Raspberry Pi3 GPIO header")
     parser.add_argument("--debug", action="store_true", default=False,
                         help="Print debug messages")
-    parser.add_argument("--version", action="version",
-                        version=f"{App.NAME} {App.VERSION}",
+    parser.add_argument("--version", action="store_true",
                         help="Print version information")
     args = parser.parse_args()
+
+    if args.version:
+        print(version_info)
 
     if args.pico:
         print_pinout(rp_pico)
