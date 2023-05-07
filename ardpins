@@ -436,7 +436,41 @@ arduino_mega_con = Pinout(
 """
 )
 
-raspberry_pi2_gpio_header = Pinout(
+raspberry_pi3 = Pinout(
+    board_name = "Raspberry Pi 3 GPIO header",
+    ground_pins = [6, 9, 14, 20, 25, 30, 34, 39],
+    power_pins = [1,2,4,17],
+    adc_pins = [], 
+    reset_pins = [],
+    nc_pins = [],
+    columns = ["pin", "analog", "timer", "com", "interrupt"],
+    pinout = """    
+             |        |      |     |   |      |  |  ┏━━━━┓  |  |       |     |     |      |       |  
+             |        |      |     |   | 3.3V |1 |  ┃▣  ◎┃  |2 | 5V    |     |     |      |       |  
+             | SDA1   |      |     |   |GPIO2 |3 |  ┃◎  ◎┃  |4 | 5V    |     |     |      |       | 
+             | SCL1   |      |     |   |GPIO3 |5 |  ┃◎  ◎┃  |6 | GND   |     |     |      |       |  
+             |        |      |     |   |GPIO4 |7 |  ┃◎  ◎┃  |8 | GPIO14|     |     |      | TXD0  |  
+             |        |      |     |   | GND  |9 |  ┃◎  ◎┃  |10| GPIO15|     |     |      | RXD0  |  
+             |        |      |     |   |GPIO17|11|  ┃◎  ◎┃  |12| GPIO18|     |     |      |       |  
+             |        |      |     |   |GPIO27|13|  ┃◎  ◎┃  |14| GND   |     |     |      |       |  
+             |        |      |     |   |GPIO22|15|  ┃◎  ◎┃  |16| GPIO23|     |     |      |       |  
+             |        |      |     |   | 3.3V |17|  ┃◎  ◎┃  |18| GPIO24|     |     |      |       |
+             |SPI MOSI|      |     |   |GPIO10|19|  ┃◎  ◎┃  |20| GND   |     |     |      |       |
+             |SPI MISO|      |     |   |GPIO9 |21|  ┃◎  ◎┃  |22|GPIO25 |     |     |      |       |
+             |SPI CLK |      |     |   |GPIO11|23|  ┃◎  ◎┃  |24|GPIO8  |     |     |      |SPI CE0|
+             |        |      |     |   | GND  |25|  ┃◎  ◎┃  |26|GPIO7  |     |     |      |SPI CE1|
+             | ID_SD  |      |     |   |GPIO0 |27|  ┃◎  ◎┃  |28|GPIO1  |     |     |      | ID_SC |
+             |        |      |     |   |GPIO05|29|  ┃◎  ◎┃  |30| GND   |     |     |      |       |   
+             |        |      |     |   |GPIO06|31|  ┃◎  ◎┃  |32|GPIO12 |     |     |      |       |   
+             |        |      |     |   |GPIO13|33|  ┃◎  ◎┃  |34| GND   |     |     |      |       |  
+             |        |      |     |   |GPIO19|35|  ┃◎  ◎┃  |36| GPIO16|     |     |      |       |  
+             |        |      |     |   |GPIO26|37|  ┃◎  ◎┃  |38| GPIO20|     |     |      |       |  
+             |        |      |     |   | GND  |39|  ┃◎  ◎┃  |40| GPIO21|     |     |      |       |    
+             |        |      |     |   |      |  |  ┗━━━━┛  |  |       |     |     |      |       |    
+"""
+)
+
+raspberry_pi2 = Pinout(
     board_name = "Raspberry Pi 2 GPIO header",
     ground_pins = [6, 9, 14, 20, 25, 30, 34, 39],
     power_pins = [1,2,4,17],
@@ -445,34 +479,87 @@ raspberry_pi2_gpio_header = Pinout(
     nc_pins = [],
     columns = ["pin", "analog", "timer", "com", "interrupt"],
     pinout = """    
+             |        |      |     |   |      |  |  ┏━━━━┓  |  |       |     |     |      |       | 
+             |        |      |     |   | 3.3V |1 |  ┃▣  ◎┃  |2 | 5V    |     |     |      |       | 
+             | SDA1   |      |     |   |GPIO2 |3 |  ┃◎  ◎┃  |4 | 5V    |     |     |      |       |
+             | SCL1   |      |     |   |GPIO3 |5 |  ┃◎  ◎┃  |6 | GND   |     |     |      |       | 
+             |        |      |     |   |GPIO4 |7 |  ┃◎  ◎┃  |8 | GPIO14|     |     |      | TXD0  | 
+             |        |      |     |   | GND  |9 |  ┃◎  ◎┃  |10| GPIO15|     |     |      | RXD0  | 
+             |        |      |     |   |GPIO17|11|  ┃◎  ◎┃  |12| GPIO18|     |     |      |       | 
+             |        |      |     |   |GPIO27|13|  ┃◎  ◎┃  |14| GND   |     |     |      |       |  
+             |        |      |     |   |GPIO22|15|  ┃◎  ◎┃  |16| GPIO23|     |     |      |       |  
+             |        |      |     |   | 3.3V |17|  ┃◎  ◎┃  |18| GPIO24|     |     |      |       |
+             |SPI MOSI|      |     |   |GPIO10|19|  ┃◎  ◎┃  |20| GND   |     |     |      |       |
+             |SPI MISO|      |     |   |GPIO9 |21|  ┃◎  ◎┃  |22|GPIO25 |     |     |      |       |
+             |SPI CLK |      |     |   |GPIO11|23|  ┃◎  ◎┃  |24|GPIO8  |     |     |      |SPI CE0|
+             |        |      |     |   | GND  |25|  ┃◎  ◎┃  |26|GPIO7  |     |     |      |SPI CE1|
+             | ID_SD  |      |     |   |GPIO0 |27|  ┃◎  ◎┃  |28|GPIO1  |     |     |      | ID_SC |
+             |        |      |     |   |GPIO05|29|  ┃◎  ◎┃  |30| GND   |     |     |      |       |   
+             |        |      |     |   |GPIO06|31|  ┃◎  ◎┃  |32|GPIO12 |     |     |      |       |   
+             |        |      |     |   |GPIO13|33|  ┃◎  ◎┃  |34| GND   |     |     |      |       |  
+             |        |      |     |   |GPIO19|35|  ┃◎  ◎┃  |36| GPIO16|     |     |      |       |  
+             |        |      |     |   |GPIO26|37|  ┃◎  ◎┃  |38| GPIO20|     |     |      |       |  
+             |        |      |     |   | GND  |39|  ┃◎  ◎┃  |40| GPIO21|     |     |      |       |    
+             |        |      |     |   |      |  |  ┗━━━━┛  |  |       |     |     |      |       |    
+"""
+)
+
+raspberry_pi1_rev1 = Pinout(
+    board_name = "Raspberry Pi 1 GPIO header Rev. 1",
+    ground_pins = [6, 9, 14, 20, 25],
+    power_pins = [1,2,4,17],
+    adc_pins = [], 
+    reset_pins = [],
+    nc_pins = [],
+    columns = ["pin", "analog", "timer", "com", "interrupt"],
+    pinout = """    
+        |        |    |    |   |      |  |  ┏━━━━┓  |  |       |    |     |      |        |  
+        |        |    |    |   | 3.3V |1 |  ┃▣  ◎┃  |2 | 5V    |    |     |      |        |  
+        | SDA1   |    |    |   |GPIO0 |3 |  ┃◎  ◎┃  |4 | 5V    |    |     |      |        | 
+        | SCL1   |    |    |   |GPIO1 |5 |  ┃◎  ◎┃  |6 | GND   |    |     |      |        |  
+        |        |    |    |   |GPIO4 |7 |  ┃◎  ◎┃  |8 | GPIO14|    |     |      | TXD0   |  
+        |        |    |    |   | GND  |9 |  ┃◎  ◎┃  |10| GPIO15|    |     |      | RXD0   |  
+        |        |    |    |   |GPIO17|11|  ┃◎  ◎┃  |12| GPIO18|    |     |      |        |  
+        |        |    |    |   |GPIO21|13|  ┃◎  ◎┃  |14| GND   |    |     |      |        |  
+        |        |    |    |   |GPIO22|15|  ┃◎  ◎┃  |16| GPIO23|    |     |      |        |  
+        |        |    |    |   | 3.3V |17|  ┃◎  ◎┃  |18| GPIO24|    |     |      |        |
+        |SPI MOSI|    |    |   |GPIO10|19|  ┃◎  ◎┃  |20| GND   |    |     |      |        |
+        |SPI MISO|    |    |   |GPIO9 |21|  ┃◎  ◎┃  |22|GPIO25 |    |     |      |        |
+        |SPI CLK |    |    |   |GPIO11|23|  ┃◎  ◎┃  |24|GPIO8  |    |     |      |SPI CE0 |
+        |        |    |    |   | GND  |25|  ┃◎  ◎┃  |26|GPIO7  |    |     |      |SPI CE1 |   
+        |        |    |    |   |      |  |  ┗━━━━┛  |  |       |    |     |      |        |    
+"""
+)
+
+raspberry_pi1_rev2 = Pinout(
+    board_name = "Raspberry Pi 1 GPIO header Rev. 2",
+    ground_pins = [6, 9, 14, 20, 25],
+    power_pins = [1,2,4,17],
+    adc_pins = [], 
+    reset_pins = [],
+    nc_pins = [],
+    columns = ["pin", "analog", "timer", "com", "interrupt"],
+    pinout = """    
              |        |        |     |   |      |  |  ┏━━━━┓  |  |       |      |      |          |          |  
              |        |        |     |   | 3.3V |1 |  ┃▣  ◎┃  |2 | 5V    |      |      |          |          |  
-             | SDA1   |        |     |   |GPIO02|3 |  ┃◎  ◎┃  |4 | 5V    |      |      |          |          | 
-             | SCL1   |        |     |   |GPIO03|5 |  ┃◎  ◎┃  |6 | GND   |      |      |          |          |  
-             |        |        |     |   |GPIO04|7 |  ┃◎  ◎┃  |8 | GPIO14|      |      |          | TXD0     |  
+             | SDA1   |        |     |   |GPIO2 |3 |  ┃◎  ◎┃  |4 | 5V    |      |      |          |          | 
+             | SCL1   |        |     |   |GPIO3 |5 |  ┃◎  ◎┃  |6 | GND   |      |      |          |          |  
+             |        |        |     |   |GPIO4 |7 |  ┃◎  ◎┃  |8 | GPIO14|      |      |          | TXD0     |  
              |        |        |     |   | GND  |9 |  ┃◎  ◎┃  |10| GPIO15|      |      |          | RXD0     |  
              |        |        |     |   |GPIO17|11|  ┃◎  ◎┃  |12| GPIO18|      |      |          |          |  
              |        |        |     |   |GPIO27|13|  ┃◎  ◎┃  |14| GND   |      |      |          |          |  
              |        |        |     |   |GPIO22|15|  ┃◎  ◎┃  |16| GPIO23|      |      |          |          |  
              |        |        |     |   | 3.3V |17|  ┃◎  ◎┃  |18| GPIO24|      |      |          |          |
              |SPI MOSI|        |     |   |GPIO10|19|  ┃◎  ◎┃  |20| GND   |      |      |          |          |
-             |SPI MISO|        |     |   |GPIO09|21|  ┃◎  ◎┃  |22|GPIO25 |      |      |          |SPI CE0 N |
-             |SPI CLK |        |     |   |GPIO11|23|  ┃◎  ◎┃  |24|GPIO08 |      |      |          |SPI CE1 N |
-             |        |        |     |   | GND  |25|  ┃◎  ◎┃  |26|GPIO07 |      |      |          |          |
-             |        |        |     |   |ID_SD |27|  ┃◎  ◎┃  |28| ID_SC |      |      |          |          |
-             |        |        |     |   |GPIO05|29|  ┃◎  ◎┃  |30| GND   |      |      |          |          |   
-             |        |        |     |   |GPIO06|31|  ┃◎  ◎┃  |32|GPIO12 |      |      |          |          |   
-             |        |        |     |   |GPIO13|33|  ┃◎  ◎┃  |34| GND   |      |      |          |          |  
-             |        |        |     |   |GPIO19|35|  ┃◎  ◎┃  |36| GPIO16|      |      |          |          |  
-             |        |        |     |   |GPIO26|37|  ┃◎  ◎┃  |38| GPIO20|      |      |          |          |  
-             |        |        |     |   | GND  |39|  ┃◎  ◎┃  |40| GPIO21|      |      |          |          |    
+             |SPI MISO|        |     |   |GPIO9 |21|  ┃◎  ◎┃  |22|GPIO25 |      |      |          |          |
+             |SPI CLK |        |     |   |GPIO11|23|  ┃◎  ◎┃  |24|GPIO8  |      |      |          |SPI CE0   |
+             |        |        |     |   | GND  |25|  ┃◎  ◎┃  |26|GPIO7  |      |      |          |SPI CE1   |   
              |        |        |     |   |      |  |  ┗━━━━┛  |  |       |      |      |          |          |    
 """
 )
 
 
 # Code -----------------------------------------------------------------------
-
 
 
 def print_pinout(pinout):
@@ -544,8 +631,12 @@ def main() -> None:
                         help="ET-AVR Stamp (ATMega128)")
     parser.add_argument("--pico", action="store_true", default=False,
                         help="Raspberry Pi Pico")
+    parser.add_argument("--pi1", action="store_true", default=False,
+                        help="Raspberry Pi1 GPIO header")
     parser.add_argument("--pi2", action="store_true", default=False,
                         help="Raspberry Pi2 GPIO header")
+    parser.add_argument("--pi3", action="store_true", default=False,
+                        help="Raspberry Pi3 GPIO header")
     parser.add_argument("--debug", action="store_true", default=False,
                         help="Print debug messages")
     parser.add_argument("--version", action="version",
@@ -572,8 +663,15 @@ def main() -> None:
     if args.et:
         print_pinout(ET_AVR_STAMP)
 
+    if args.pi1:
+        print_pinout(raspberry_pi1_rev1)
+        print_pinout(raspberry_pi1_rev2)
+
     if args.pi2:
-        print_pinout(raspberry_pi2_gpio_header)
+        print_pinout(raspberry_pi2)
+    
+    if args.pi3:
+        print_pinout(raspberry_pi3)
 
 if __name__ == "__main__":
     try:
