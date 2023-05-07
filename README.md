@@ -36,6 +36,8 @@ https://pico.pinout.xyz
 
 ![xx][uno]
 
+![xx][pi2]
+
 ## Requirements
 - Python 3
 - Rich
@@ -64,3 +66,4 @@ $ git clone https://github.com/zonbrisad/pins.git
 
 [Nano]: Arduino_Nano.png "nano"
 [Uno]: Arduino_Uno.png "uno"
+[pi2]: rp2_header.png "pi2"
