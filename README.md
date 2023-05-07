@@ -34,31 +34,25 @@
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## About
+Make connector pinouts available in the terminal window.
 
-## Features
+![xx][nano]
 
 ## Requirements
 - Python 3
 - Rich
 
-### Runtime
-
-### Development
-
 ## Install
-
 
 ### Download
 
+```bash
+$ git clone https://github.com/zonbrisad/pins.git
+```
 
 ### Installation
 
-
-### Configuration
-
-
 ## Freqlenty asked Questions
-
 
 ## History
 
@@ -79,4 +73,5 @@
 
 ## Links
 
-[Markup basics](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls)
+[Nano]: Arduino_Nano.png "nano"
+[Uno]: Arduino_Uno.png "uno"
