@@ -603,6 +603,41 @@ raspberry_pi1_rev2 = Pinout(
 """
 )
 
+blue_pill = Pinout(
+    board_name = "Blue pill",
+    mcu_name = "STM32F103C6T6/STM32F103C8T6",
+    ground_pins = [19, 20, 39, 43],
+    power_pins = [1, 18, 38, 40, 41],
+    reset_pins = [17],
+    columns = ["pin", "analog", "pwm", "com", "interrupt"],
+    pinout = """
+             |     |     |       |     |     |  |     ┏━━━━━┓     |  |      |      |      |    |       |         
+             |     |     |       |     |     |  |┏━━━━┫ USB ┣━━━━┓|  |      |      |      |    |       |             
+             |     |     |       |     |PB12 |21|┃◎   ┗━━━━━┛   ▣┃|20| GND  |      |      |    |       |   
+             |     |     |       |     |PB13 |22|┃◎             ▣┃|19| GND  |      |      |    |       |   
+             |     |     |       |     |PB14 |23|┃◎             ◎┃|18| 3V3  |      |      |    |       |   
+             |     |     |       |     |PB15 |24|┃◎             ◎┃|17|RESET |      |      |    |       |   
+             |     |CK1  |       |     |PA8  |25|┃◎             ◎┃|16| PB11 |      |      |RX3 | SDA2  |   
+             |     |TX1  |       |     |PA9  |26|┃◎             ◎┃|15| PB10 |      |      |TX3 | SCL2  |   
+             |     |RX1  |       |     |PA10 |27|┃◎             ◎┃|14| PB1  | ADC9 |      |    |       |   
+        USB- |     |CTS1 |       |     |PA11 |28|┃◎             ◎┃|13| PB0  | ADC8 |      |    |       |   
+        USB+ |     |RTS1 |       |     |PA12 |29|┃◎             ◎┃|12| PA7  | ADC7 |      |    |       | MOSI1  
+             |     |     |       |     |PA15 |30|┃◎             ◎┃|11| PA6  | ADC6 |      |    |       | MISO1  
+             |     |     |       |     |PB3  |31|┃◎             ◎┃|10| PA5  | ADC5 |      |    |       | SCK1 
+             |     |     |       |     |PB4  |32|┃◎             ◎┃| 9| PA4  | ADC4 |      |CK2 |       | NSS1 
+             |     |     |       |     |PB5  |33|┃◎             ◎┃| 8| PA3  | ADC3 |      |RX2 |       |  
+             |     |TX1  |       |     |PB6  |34|┃◎             ◎┃| 7| PA2  | ADC2 |      |TX2 |       |  
+             |     |RX1  |       |     |PB7  |35|┃◎             ◎┃| 6| PA1  | ADC1 |      |RTS2|       |  
+             |     |CANRX|       |     |PB8  |36|┃◎             ◎┃| 5| PA0  | ADC0 |      |CTS2|       |  
+             |     |CANTX|       |     |PB9  |37|┃◎             ◎┃| 4| PC15 |      |      |    |       |         
+             |     |     |       |     |  5V |38|┃◎             ◎┃| 3| PC14 |      |      |    |       |  
+             |     |     |       |     | GND |39|┃▣        [LED]◎┃| 2| PC13 |      |      |    |       |  
+             |     |     |       |     | 3V3 |40|┃◎   ◎ ◎ ◎ ▣   ◎┃| 1|VBAT  |      |      |    |       |  
+             |     |     |       |     |     |  |┗━━━━╋━╋━╋━╋━━━━┛|  |      |      |      |    |       |         
+             |     |     |       |     | 3V3 |41| ━━━━┛ ┃ ┃ ┗━━━━━|43|GND   |      |      |    |       |         
+             |     |     |       |     | PA13|42| ━━━━━━┛ ┗━━━━━━━|44| PA14 |      |      |    |       |               
+"""
+)
 
 # Code -----------------------------------------------------------------------
 
@@ -681,6 +716,8 @@ def main() -> None:
                         help="Raspberry Pi2 GPIO header")
     parser.add_argument("--pi3", action="store_true", default=False,
                         help="Raspberry Pi3 GPIO header")
+    parser.add_argument("--bp", action="store_true", default=False,
+                        help="Blue Pill (STM32)")
     parser.add_argument("--debug", action="store_true", default=False,
                         help="Print debug messages")
     parser.add_argument("--version", action="store_true",
@@ -718,6 +755,9 @@ def main() -> None:
     
     if args.pi3:
         print_pinout(raspberry_pi3)
+
+    if args.bp:
+        print_pinout(blue_pill)
 
 if __name__ == "__main__":
     try:
