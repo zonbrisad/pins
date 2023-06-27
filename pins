@@ -251,7 +251,7 @@ arduino_pro_mini = Pinout(
 arduino_nano = Pinout(
     board_name = "Arduino Nano",
     mcu_name = "ATMega328p",
-    ground_pins = (29, 4, 23),
+    ground_pins = (29, 4),
     power_pins = (17, 27, 30),
     reset_pins = (3, 28),
     columns = ["pin", "analog", "pwm", "com", "interrupt"],
@@ -267,8 +267,8 @@ arduino_nano = Pinout(
      PCINT11 |       |  | ADC3  | PC3 |D17   |22|┃◎             ◎┃| 9|D6   | PD6  | AIN0 |OC0A|       | PCINT22 
      PCINT12 |  SDA  |  | ADC4  | PC4 |D18   |23|┃◎             ◎┃| 8|D5   | PD5  |      |OC0B|       | PCINT21 
      PCINT13 |  SCL  |  | ADC5  | PC5 |D19   |24|┃◎   ▓▓▓▓▓▓▓   ◎┃| 7|D4   | PD4  |      |    |       | PCINT20 
-             |       |  |       |     |D20   |25|┃◎   ▓▓▓▓▓▓▓   ◎┃| 6|D3   | PD3  |      |OC2B| INT1  | PCINT19 
-             |       |  |       |     |D21   |26|┃◎   ▓▓▓▓▓▓▓   ◎┃| 5|D2   | PD2  |      |    | INT0  | PCINT18 
+             |       |  | ADC6  |     |      |25|┃◎   ▓▓▓▓▓▓▓   ◎┃| 6|D3   | PD3  |      |OC2B| INT1  | PCINT19 
+             |       |  | ADC7  |     |      |26|┃◎   ▓▓▓▓▓▓▓   ◎┃| 5|D2   | PD2  |      |    | INT0  | PCINT18 
              |       |  |       |     |+5V   |27|┃◎   ▓▓▓▓▓▓▓   ▣┃| 4|GND  |      |      |    |       |         
      PCINT14 |       |  |       | PC6 |Reset |28|┃◎             ◎┃| 3|Reset| PC6  |      |    |       | PCINT14 
              |       |  |       |     |GND   |29|┃▣    ◎ ◎ ◎    ◎┃| 2|D0   | PD0  |      |    | RXD   | PCINT16 
