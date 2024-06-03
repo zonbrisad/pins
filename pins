@@ -6,9 +6,9 @@
 #
 # File:     pins
 # Author:   Peter Malmberg  <peter.malmberg@gmail.com>
-# Org:      
+# Org:
 # Date:     2023-04-30
-# License:  
+# License:
 # Python:   >= 3.0
 #
 # ----------------------------------------------------------------------------
@@ -27,6 +27,7 @@ from dataclasses import dataclass, field
 
 # Variables ------------------------------------------------------------------
 
+
 class App:
     NAME = "pins"
     VERSION = "0.20"
@@ -39,7 +40,7 @@ class App:
     ICON = ""
 
 
-version_info=f"""\
+version_info = f"""\
 {App.NAME} {App.VERSION}
 
 {App.NAME} is i program for presenting PCB pinouts in a terminal window.
@@ -72,19 +73,19 @@ THEME = {
     "run": "#df8f8e",
     "highlight": "#dc322f on white",
     "pin": "#FF9944",
-    "analog":"#0492C2",
-    "com":"#d33682",
-    "interrupt":"#666666",
+    "analog": "#0492C2",
+    "com": "#d33682",
+    "interrupt": "#666666",
     "timer": "#006B3C",
 }
- 
+
 
 @dataclass
-class Pinout():
+class Pinout:
     board_name: str = ""
     mcu_name: str = ""
     pinout: str = ""
-    ground_pins: list[int] = field(default_factory=list)    
+    ground_pins: list[int] = field(default_factory=list)
     power_pins: list[int] = field(default_factory=list)
     adc_pins: list[int] = field(default_factory=list)
     run_pins: list[int] = field(default_factory=list)
@@ -94,28 +95,33 @@ class Pinout():
 
     def is_ground_pin(self, pin) -> bool:
         return pin in self.ground_pins
-    
+
     def is_power_pin(self, pin) -> bool:
         return pin in self.power_pins
-    
+
     def is_adc_pin(self, pin) -> bool:
         return pin in self.adc_pins
-    
+
     def is_run_pin(self, pin) -> bool:
         return pin in self.run_pins
-    
+
     def is_reset_pin(self, pin) -> bool:
         return pin in self.reset_pins
-    
+
     def pin_style(self, pin):
         style = THEME["gpio"]
-        if self.is_ground_pin(pin): style = THEME["ground"]
-        if self.is_power_pin(pin): style = THEME["power"]
-        if self.is_adc_pin(pin): style = THEME["adc"]
-        if self.is_run_pin(pin): style = THEME["run"]
-        if self.is_reset_pin(pin): style = THEME["reset"]
+        if self.is_ground_pin(pin):
+            style = THEME["ground"]
+        if self.is_power_pin(pin):
+            style = THEME["power"]
+        if self.is_adc_pin(pin):
+            style = THEME["adc"]
+        if self.is_run_pin(pin):
+            style = THEME["run"]
+        if self.is_reset_pin(pin):
+            style = THEME["reset"]
         return style
-    
+
     def build_row(self, row, show_indexes, find=None):
         for index in show_indexes:
             label = row[index]
@@ -124,9 +130,9 @@ class Pinout():
                 label = f'[{THEME["highlight"]}]{label}[/]'
             else:
                 if index == 5 and row[6] != "":
-                    label = f'[{self.pin_style(int(row[6]))}]{label}[/]'
+                    label = f"[{self.pin_style(int(row[6]))}]{label}[/]"
                 if index == 9 and row[8] != "":
-                    label = f'[{self.pin_style(int(row[8]))}]{label}[/]'
+                    label = f"[{self.pin_style(int(row[8]))}]{label}[/]"
             # Slight fudge for whitespace between labels
             if index >= 7:
                 label = " " + label
@@ -145,52 +151,53 @@ class Pinout():
                     c.append(col.strip())
             r.append(c)
         return r
-    
+
+
 rp_pico = Pinout(
-    board_name = "Raspberry Pi Pico",
-    mcu_name = "RP2040",
-    ground_pins = (3, 8, 13, 18, 23, 28, 38),
-    power_pins = (40, 39, 37, 36),
-    adc_pins = (35, 34, 33, 32, 31), 
-    run_pins = [30], 
-#    columns = ["pin", "analog", "pwm", "com", "interrupt"],
-    columns = ["spi", "i2c", "uart", "pwm", "interrupt"],
-    pinout = """
- |      |         |        |        |      |  |     ┏━━━━━┓     |  |          |     |        |        |         |        
- |      |         |        |        |      |  |┏━━━━┫     ┣━━━━┓|  |          |     |        |        |         |        
- |PWM0 A|UART0 TX |I2C0 SDA|SPI0 RX |GP0   |1 |┃◎   ┗━━━━━┛   ◎┃|40|VBUS      |     |        |        |         |        
- |PWM0 B|UART0 RX |I2C0 SCL|SPI0 CSn|GP1   |2 |┃◎ ▩           ◎┃|39|VSYS      |     |        |        |         |        
- |      |         |        |        |GND   |3 |┃▣ └─GP25      ▣┃|38|GND       |     |        |        |         |        
- |PWM1 A|UART0 CTS|I2C1 SDA|SPI0 SCK|GP2   |4 |┃◎  ▒▒▒        ◎┃|37|3v3 En    |     |        |        |         |        
- |PWM1 B|UART0 RTS|I2C1 SCL|SPI0 TX |GP3   |5 |┃◎  ▒▒▒        ◎┃|36|3v3 Out   |     |        |        |         |        
- |PWM2 A|UART1 TX |I2C0 SDA|SPI0 RX |GP4   |6 |┃◎             ◎┃|35|          |ADC VRef    |        |        |         |        
- |PWM2 B|UART1 RX |I2C0 SCL|SPI0 CSn|GP5   |7 |┃◎             ◎┃|34|GP28      |ADC2 |SPI1 RX |I2C0 SDA|UART0 TX |PWM6 A  
- |      |         |        |        |GND   |8 |┃▣             ▣┃|33|GND       |AGND |        |        |         |        
- |PWM3 A|UART1 CTS|I2C1 SDA|SPI0 SCK|GP6   |9 |┃◎   ▓▓▓▓▓▓▓   ◎┃|32|GP27      |ADC1 |SPI1 TX |I2C1 SCL|UART1 RTS|PWM5 B  
- |PWM3 B|UART1 RTS|I2C1 SCL|SPI0 TX |GP7   |10|┃◎   ▓▓▓▓▓▓▓   ◎┃|31|GP26      |ADC0 |SPI1 SCK|I2C1 SDA|UART1 CTS|PWM5 A  
- |PWM4 A|UART1 TX |I2C0 SDA|SPI1 RX |GP8   |11|┃◎   ▓▓▓▓▓▓▓   ◎┃|30|run       |     |        |        |         |        
- |PWM4 B|UART1 RX |I2C0 SCL|SPI1 CSn|GP9   |12|┃◎   ▓▓▓▓▓▓▓   ◎┃|29|GP22      |     |SPI0 SCK|I2C1 SDA|UART1 CTS|PWM3 A  
- |      |         |        |        |GND   |13|┃▣             ▣┃|28|GND       |     |        |        |         |        
- |PWM5 A|UART1 CTS|I2C1 SDA|SPI1 SCK|GP10  |14|┃◎             ◎┃|27|GP21      |     |SPI0 CSn|I2C0 SCL|UART1 RX |PWM2 B  
- |PWM5 B|UART1 RTS|I2C1 SCL|SPI1 TX |GP11  |15|┃◎             ◎┃|26|GP20      |     |SPI0 RX |I2C0 SDA|UART1 TX |PWM2 A  
- |PWM6 A|UART0 TX |I2C0 SDA|SPI1 RX |GP12  |16|┃◎             ◎┃|25|GP19      |     |SPI0 TX |I2C1 SCL|UART0 RTS|PWM1 B  
- |PWM6 B|UART0 RX |I2C0 SCL|SPI1 CSn|GP13  |17|┃◎             ◎┃|24|GP18      |     |SPI0 SCK|I2C1 SDA|UART0 CTS|PWM1 A  
- |      |         |        |        |GND   |18|┃▣             ▣┃|23|GND       |     |        |        |         |        
- |PWM7 A|UART0 CTS|I2C1 SDA|SPI1 SCK|GP14  |19|┃◎             ◎┃|22|GP17      |     |SPI0 CSn|I2C0 SCL|UART0 RX |PWM0 B  
- |PWM7 B|UART0 RTS|I2C1 SCL|SPI1 TX |GP15  |20|┃◎    ◎ ▣ ◎    ◎┃|21|GP16      |     |SPI0 RX |I2C0 SDA|UART0 TX |PWM0 A  
- |      |         |        |        |      |  |┗━━━━━━━━━━━━━━━┛|  |          |     |        |        |         |        
-"""
+    board_name="Raspberry Pi Pico",
+    mcu_name="RP2040",
+    ground_pins=(3, 8, 13, 18, 23, 28, 38),
+    power_pins=(40, 39, 37, 36),
+    adc_pins=(35, 34, 33, 32, 31),
+    run_pins=[30],
+    #    columns = ["pin", "analog", "pwm", "com", "interrupt"],
+    columns=["spi", "i2c", "uart", "pwm", "interrupt"],
+    pinout="""
+ |      |         |        |        |      |  |     ┏━━━━━┓     |  |          |        |        |        |         |
+ |      |         |        |        |      |  |┏━━━━┫     ┣━━━━┓|  |          |        |        |        |         |
+ |PWM0 A|UART0 TX |I2C0 SDA|SPI0 RX |GP0   |1 |┃◎   ┗━━━━━┛   ◎┃|40|VBUS      |        |        |        |         |
+ |PWM0 B|UART0 RX |I2C0 SCL|SPI0 CSn|GP1   |2 |┃◎ ▩           ◎┃|39|VSYS      |        |        |        |         |
+ |      |         |        |        |GND   |3 |┃▣ └─GP25      ▣┃|38|GND       |        |        |        |         |
+ |PWM1 A|UART0 CTS|I2C1 SDA|SPI0 SCK|GP2   |4 |┃◎  ▒▒▒        ◎┃|37|3v3 En    |        |        |        |         |
+ |PWM1 B|UART0 RTS|I2C1 SCL|SPI0 TX |GP3   |5 |┃◎  ▒▒▒        ◎┃|36|3v3 Out   |        |        |        |         |
+ |PWM2 A|UART1 TX |I2C0 SDA|SPI0 RX |GP4   |6 |┃◎             ◎┃|35|          |ADC VRef|        |        |         |
+ |PWM2 B|UART1 RX |I2C0 SCL|SPI0 CSn|GP5   |7 |┃◎             ◎┃|34|GP28      |ADC2    |SPI1 RX |I2C0 SDA|UART0 TX |PWM6 A
+ |      |         |        |        |GND   |8 |┃▣             ▣┃|33|GND       |AGND    |        |        |         |
+ |PWM3 A|UART1 CTS|I2C1 SDA|SPI0 SCK|GP6   |9 |┃◎   ▓▓▓▓▓▓▓   ◎┃|32|GP27      |ADC1    |SPI1 TX |I2C1 SCL|UART1 RTS|PWM5 B
+ |PWM3 B|UART1 RTS|I2C1 SCL|SPI0 TX |GP7   |10|┃◎   ▓▓▓▓▓▓▓   ◎┃|31|GP26      |ADC0    |SPI1 SCK|I2C1 SDA|UART1 CTS|PWM5 A
+ |PWM4 A|UART1 TX |I2C0 SDA|SPI1 RX |GP8   |11|┃◎   ▓▓▓▓▓▓▓   ◎┃|30|run       |        |        |        |         |
+ |PWM4 B|UART1 RX |I2C0 SCL|SPI1 CSn|GP9   |12|┃◎   ▓▓▓▓▓▓▓   ◎┃|29|GP22      |        |SPI0 SCK|I2C1 SDA|UART1 CTS|PWM3 A
+ |      |         |        |        |GND   |13|┃▣             ▣┃|28|GND       |        |        |        |         |
+ |PWM5 A|UART1 CTS|I2C1 SDA|SPI1 SCK|GP10  |14|┃◎             ◎┃|27|GP21      |        |SPI0 CSn|I2C0 SCL|UART1 RX |PWM2 B
+ |PWM5 B|UART1 RTS|I2C1 SCL|SPI1 TX |GP11  |15|┃◎             ◎┃|26|GP20      |        |SPI0 RX |I2C0 SDA|UART1 TX |PWM2 A
+ |PWM6 A|UART0 TX |I2C0 SDA|SPI1 RX |GP12  |16|┃◎             ◎┃|25|GP19      |        |SPI0 TX |I2C1 SCL|UART0 RTS|PWM1 B
+ |PWM6 B|UART0 RX |I2C0 SCL|SPI1 CSn|GP13  |17|┃◎             ◎┃|24|GP18      |        |SPI0 SCK|I2C1 SDA|UART0 CTS|PWM1 A
+ |      |         |        |        |GND   |18|┃▣             ▣┃|23|GND       |        |        |        |         |
+ |PWM7 A|UART0 CTS|I2C1 SDA|SPI1 SCK|GP14  |19|┃◎             ◎┃|22|GP17      |        |SPI0 CSn|I2C0 SCL|UART0 RX |PWM0 B
+ |PWM7 B|UART0 RTS|I2C1 SCL|SPI1 TX |GP15  |20|┃◎    ◎ ▣ ◎    ◎┃|21|GP16      |        |SPI0 RX |I2C0 SDA|UART0 TX |PWM0 A
+ |      |         |        |        |      |  |┗━━━━━━━━━━━━━━━┛|  |          |        |        |        |         |
+""",
 )
 rp_pico_orig = Pinout(
-    board_name = "Raspberry Pi Pico",
-    mcu_name = "RP2040",
-    ground_pins = (3, 8, 13, 18, 23, 28, 38),
-    power_pins = (40, 39, 37, 36),
-    adc_pins = (35, 34, 33, 32, 31), 
-    run_pins = [30], 
-#    columns = ["pin", "analog", "pwm", "com", "interrupt"],
-    columns = ["spi", "i2c", "uart", "pwm", "interrupt"],
-    pinout = """
+    board_name="Raspberry Pi Pico",
+    mcu_name="RP2040",
+    ground_pins=(3, 8, 13, 18, 23, 28, 38),
+    power_pins=(40, 39, 37, 36),
+    adc_pins=(35, 34, 33, 32, 31),
+    run_pins=[30],
+    #    columns = ["pin", "analog", "pwm", "com", "interrupt"],
+    columns=["spi", "i2c", "uart", "pwm", "interrupt"],
+    pinout="""
  |      |         |        |        |      |  |     ┏━━━━━┓     |  |          |        |        |         |        |
  |      |         |        |        |      |  |┏━━━━┫     ┣━━━━┓|  |          |        |        |         |        |
  |PWM0 A|UART0 TX |I2C0 SDA|SPI0 RX |GP0   |1 |┃◎   ┗━━━━━┛   ◎┃|40|VBUS      |        |        |         |        |
@@ -214,432 +221,436 @@ rp_pico_orig = Pinout(
  |PWM7 A|UART0 CTS|I2C1 SDA|SPI1 SCK|GP14  |19|┃◎             ◎┃|22|GP17      |SPI0 CSn|I2C0 SCL|UART0 RX |PWM0 B  |
  |PWM7 B|UART0 RTS|I2C1 SCL|SPI1 TX |GP15  |20|┃◎    ◎ ▣ ◎    ◎┃|21|GP16      |SPI0 RX |I2C0 SDA|UART0 TX |PWM0 A  |
  |      |         |        |        |      |  |┗━━━━━━━━━━━━━━━┛|  |          |        |        |         |        |
-"""
+""",
 )
 
 arduino_pro_mini = Pinout(
-    board_name = "Arduino Pro Mini",
-    mcu_name = "ATMega328p",
-    ground_pins = [16, 11, 29, 30],
-    power_pins = [9, 12, 28],
-    reset_pins = [10, 15],
-    columns = ["pin", "analog", "pwm", "com", "interrupt"],
-    pinout = """
-             |         |    |       |     | VCC |28| ━━━━━━┓ ┏━━━━━━ |27|     | PD0  |      |    | RXD   | PCINT16        
-             |         |    |       |     | GND |29| ━━━━┓ ┃ ┃ ┏━━━━ |26|     | PD1  |      |    | TXD   | PCINT17        
-             |         |    |       |     | GND |30| ━━┓ ┃ ┃ ┃ ┃ ┏━━ |25|     | DTR  |      |    |       | Reset via cap         
-             |         |    |       |     |     |  |┏━━╋━╋━╋━╋━╋━╋━━┓|  |     |      |      |    |       |         
-             |         |    |       |     |     |  |┃  ▣ ▣ ◎ ◎ ◎ ◎  ┃|  |     |      |      |    |       |   
-     PCINT17 | TXD     |    |       | PD1 | D1  |13|┃◎             ◎┃|12|RAW  |      |      |    |       |   
-     PCINT16 | RXD     |    |       | PD0 | D0  |14|┃◎             ▣┃|11|GND  |      |      |    |       |   
-     PCINT14 |         |    |       | PC6 |Reset|15|┃◎             ◎┃|10|Reset| PC6  |      |    |       | PCINT14 
-             |         |    |       |     | GND |16|┃▣             ◎┃| 9|VCC  |      |      |    |       |  
-     PCINT18 | INT0    |    |       | PD2 | D2  |17|┃◎  ┏━━━━━━━◎  ◎┃| 8|D17  | PC3  | ADC3 |    |       | PCINT11 
-     PCINT19 | INT1    |OC2B|       | PD3 | D3  |18|┃◎  ┃ ┏━━━━━◎  ◎┃| 7|D16  | PC2  | ADC2 |    |       | PCINT10 
-             |         |    |       | PD4 | D4  |19|┃◎  ┃ ┃        ◎┃| 6|D15  | PC1  | ADC1 |    |       | PCINT9 
-             |         |OC0B|       | PD5 | D5  |20|┃◎  ┃ ┃        ◎┃| 5|D14  | PC0  | ADC0 |    |       | PCINT8 
-             |         |OC0A| AIN0  | PD6 | D6  |21|┃◎  ┃ ┃  [LED] ◎┃| 4|D13  | PB5  |      |    |       |         
-     PCINT14 |         |    | AIN1  | PD7 | D7  |22|┃◎  ┃ ┃ ┏━━━◎  ◎┃| 3|D12  | PB4  |      |    | MISO  | PCINT4 
-             |         |    |       | PB0 | D8  |23|┃◎  ┃ ┃ ┃ ┏━◎  ◎┃| 2|D11  | PB3  |      |OC2A| MOSI  | PCINT3 
-             |         |OC1A|       | PB1 | D9  |24|┃◎  ┃ ┃ ┃ ┃    ◎┃| 1|D10  | PB2  |      |OC1B| SS    | PCINT2 
-             |         |    |       |     |     |  |┗━━━╋━╋━╋━╋━━━━━┛|  |     |      |      |    |       |         
-             |  SCL    |    | ADC5  | PC5 | D19 |33| ━━━┛ ┃ ┃ ┗━━━━━━|31|     |      | ADC6 |    |       |         
-             |  SDA    |    | ADC4  | PC4 | D18 |34| ━━━━━┛ ┗━━━━━━━━|32|     |      | ADC7 |    |       |               
-"""
+    board_name="Arduino Pro Mini",
+    mcu_name="ATMega328p",
+    ground_pins=[16, 11, 29, 30],
+    power_pins=[9, 12, 28],
+    reset_pins=[10, 15],
+    columns=["pin", "analog", "pwm", "com", "interrupt"],
+    pinout="""
+             |         |    |       |     | VCC |28| ━━━━━━┓ ┏━━━━━━ |27|     | PD0  |      |    | RXD   | PCINT16
+             |         |    |       |     | GND |29| ━━━━┓ ┃ ┃ ┏━━━━ |26|     | PD1  |      |    | TXD   | PCINT17
+             |         |    |       |     | GND |30| ━━┓ ┃ ┃ ┃ ┃ ┏━━ |25|     | DTR  |      |    |       | Reset via cap
+             |         |    |       |     |     |  |┏━━╋━╋━╋━╋━╋━╋━━┓|  |     |      |      |    |       |
+             |         |    |       |     |     |  |┃  ▣ ▣ ◎ ◎ ◎ ◎  ┃|  |     |      |      |    |       |
+     PCINT17 | TXD     |    |       | PD1 | D1  |13|┃◎             ◎┃|12|RAW  |      |      |    |       |
+     PCINT16 | RXD     |    |       | PD0 | D0  |14|┃◎             ▣┃|11|GND  |      |      |    |       |
+     PCINT14 |         |    |       | PC6 |Reset|15|┃◎             ◎┃|10|Reset| PC6  |      |    |       | PCINT14
+             |         |    |       |     | GND |16|┃▣             ◎┃| 9|VCC  |      |      |    |       |
+     PCINT18 | INT0    |    |       | PD2 | D2  |17|┃◎  ┏━━━━━━━◎  ◎┃| 8|D17  | PC3  | ADC3 |    |       | PCINT11
+     PCINT19 | INT1    |OC2B|       | PD3 | D3  |18|┃◎  ┃ ┏━━━━━◎  ◎┃| 7|D16  | PC2  | ADC2 |    |       | PCINT10
+             |         |    |       | PD4 | D4  |19|┃◎  ┃ ┃        ◎┃| 6|D15  | PC1  | ADC1 |    |       | PCINT9
+             |         |OC0B|       | PD5 | D5  |20|┃◎  ┃ ┃        ◎┃| 5|D14  | PC0  | ADC0 |    |       | PCINT8
+             |         |OC0A| AIN0  | PD6 | D6  |21|┃◎  ┃ ┃  [LED] ◎┃| 4|D13  | PB5  |      |    |       |
+     PCINT14 |         |    | AIN1  | PD7 | D7  |22|┃◎  ┃ ┃ ┏━━━◎  ◎┃| 3|D12  | PB4  |      |    | MISO  | PCINT4
+             |         |    |       | PB0 | D8  |23|┃◎  ┃ ┃ ┃ ┏━◎  ◎┃| 2|D11  | PB3  |      |OC2A| MOSI  | PCINT3
+             |         |OC1A|       | PB1 | D9  |24|┃◎  ┃ ┃ ┃ ┃    ◎┃| 1|D10  | PB2  |      |OC1B| SS    | PCINT2
+             |         |    |       |     |     |  |┗━━━╋━╋━╋━╋━━━━━┛|  |     |      |      |    |       |
+             |  SCL    |    | ADC5  | PC5 | D19 |33| ━━━┛ ┃ ┃ ┗━━━━━━|31|     |      | ADC6 |    |       |
+             |  SDA    |    | ADC4  | PC4 | D18 |34| ━━━━━┛ ┗━━━━━━━━|32|     |      | ADC7 |    |       |
+""",
 )
 
 arduino_nano = Pinout(
-    board_name = "Arduino Nano",
-    mcu_name = "ATMega328p",
-    ground_pins = (29, 4),
-    power_pins = (17, 27, 30),
-    reset_pins = (3, 28),
-    columns = ["pin", "analog", "pwm", "com", "interrupt"],
-    pinout = """
-             |       |  |       |     |      |  |     ┏━━━━━┓     |  |     |      |      |    |       |         
-             |       |  |       |     |      |  |┏━━━━┫ USB ┣━━━━┓|  |     |      |      |    |       |         
-     PCINT5  |  SCK  |  |       | PB5 |D13   |16|┃◎LED┗━━━━━┛   ◎┃|15|D12  | PB4  |      |    | MISO  | PCINT4  
-             |       |  |       |     |+3V3  |17|┃◎             ◎┃|14|D11  | PB3  |      |OC2A| MOSI  | PCINT3  
-             |       |  |       |     |ARef  |18|┃◎             ◎┃|13|D10  | PB2  |      |OC1B| SS    | PCINT2  
-     PCINT8  |       |  | ADC0  | PC0 |D14   |19|┃◎  ▒▒▒        ◎┃|12|D9   | PB1  |      |OC1A|       | PCINT1  
-     PCINT9  |       |  | ADC1  | PC1 |D15   |20|┃◎  ▒▒▒        ◎┃|11|D8   | PB0  |      |    |       | PCINT0  
-     PCINT10 |       |  | ADC2  | PC2 |D16   |21|┃◎             ◎┃|10|D7   | PD7  | AIN1 |    |       | PCINT23 
-     PCINT11 |       |  | ADC3  | PC3 |D17   |22|┃◎             ◎┃| 9|D6   | PD6  | AIN0 |OC0A|       | PCINT22 
-     PCINT12 |  SDA  |  | ADC4  | PC4 |D18   |23|┃◎             ◎┃| 8|D5   | PD5  |      |OC0B|       | PCINT21 
-     PCINT13 |  SCL  |  | ADC5  | PC5 |D19   |24|┃◎   ▓▓▓▓▓▓▓   ◎┃| 7|D4   | PD4  |      |    |       | PCINT20 
-             |       |  | ADC6  |     |      |25|┃◎   ▓▓▓▓▓▓▓   ◎┃| 6|D3   | PD3  |      |OC2B| INT1  | PCINT19 
-             |       |  | ADC7  |     |      |26|┃◎   ▓▓▓▓▓▓▓   ◎┃| 5|D2   | PD2  |      |    | INT0  | PCINT18 
-             |       |  |       |     |+5V   |27|┃◎   ▓▓▓▓▓▓▓   ▣┃| 4|GND  |      |      |    |       |         
-     PCINT14 |       |  |       | PC6 |Reset |28|┃◎             ◎┃| 3|Reset| PC6  |      |    |       | PCINT14 
-             |       |  |       |     |GND   |29|┃▣    ◎ ◎ ◎    ◎┃| 2|D0   | PD0  |      |    | RXD   | PCINT16 
-             |       |  |       |     |Vin   |30|┃◎    ◎ ◎ ◎    ◎┃| 1|D1   | PD1  |      |    | TXD   | PCINT17 
-             |       |  |       |     |      |  |┗━━━━━━━━━━━━━━━┛|  |     |      |      |    |       |         
-"""
+    board_name="Arduino Nano",
+    mcu_name="ATMega328p",
+    ground_pins=(29, 4),
+    power_pins=(17, 27, 30),
+    reset_pins=(3, 28),
+    columns=["pin", "analog", "pwm", "com", "interrupt"],
+    pinout="""
+             |       |  |       |     |      |  |     ┏━━━━━┓     |  |     |      |      |    |       |
+             |       |  |       |     |      |  |┏━━━━┫ USB ┣━━━━┓|  |     |      |      |    |       |
+     PCINT5  |  SCK  |  |       | PB5 |D13   |16|┃◎LED┗━━━━━┛   ◎┃|15|D12  | PB4  |      |    | MISO  | PCINT4
+             |       |  |       |     |+3V3  |17|┃◎             ◎┃|14|D11  | PB3  |      |OC2A| MOSI  | PCINT3
+             |       |  |       |     |ARef  |18|┃◎             ◎┃|13|D10  | PB2  |      |OC1B| SS    | PCINT2
+     PCINT8  |       |  | ADC0  | PC0 |D14   |19|┃◎  ▒▒▒        ◎┃|12|D9   | PB1  |      |OC1A|       | PCINT1
+     PCINT9  |       |  | ADC1  | PC1 |D15   |20|┃◎  ▒▒▒        ◎┃|11|D8   | PB0  |      |    |       | PCINT0
+     PCINT10 |       |  | ADC2  | PC2 |D16   |21|┃◎             ◎┃|10|D7   | PD7  | AIN1 |    |       | PCINT23
+     PCINT11 |       |  | ADC3  | PC3 |D17   |22|┃◎             ◎┃| 9|D6   | PD6  | AIN0 |OC0A|       | PCINT22
+     PCINT12 |  SDA  |  | ADC4  | PC4 |D18   |23|┃◎             ◎┃| 8|D5   | PD5  |      |OC0B|       | PCINT21
+     PCINT13 |  SCL  |  | ADC5  | PC5 |D19   |24|┃◎   ▓▓▓▓▓▓▓   ◎┃| 7|D4   | PD4  |      |    |       | PCINT20
+             |       |  | ADC6  |     |      |25|┃◎   ▓▓▓▓▓▓▓   ◎┃| 6|D3   | PD3  |      |OC2B| INT1  | PCINT19
+             |       |  | ADC7  |     |      |26|┃◎   ▓▓▓▓▓▓▓   ◎┃| 5|D2   | PD2  |      |    | INT0  | PCINT18
+             |       |  |       |     |+5V   |27|┃◎   ▓▓▓▓▓▓▓   ▣┃| 4|GND  |      |      |    |       |
+     PCINT14 |       |  |       | PC6 |Reset |28|┃◎             ◎┃| 3|Reset| PC6  |      |    |       | PCINT14
+             |       |  |       |     |GND   |29|┃▣    ◎ ◎ ◎    ◎┃| 2|D0   | PD0  |      |    | RXD   | PCINT16
+             |       |  |       |     |Vin   |30|┃◎    ◎ ◎ ◎    ◎┃| 1|D1   | PD1  |      |    | TXD   | PCINT17
+             |       |  |       |     |      |  |┗━━━━━━━━━━━━━━━┛|  |     |      |      |    |       |
+""",
 )
 
 arduino_uno = Pinout(
-    board_name = "Arduino Uno",
-    mcu_name = "ATMega328p",
-    ground_pins = [15, 23, 24],
-    power_pins = [21, 22, 25],
-    reset_pins = [20],
-    nc_pins = [19],
-    columns = ["pin", "analog", "timer", "com", "interrupt"],
-    pinout = """
-             |         |  |      |     |      |  |                        ┏━━━━━━━┓        |  |     |      |      |    |       |         
-             |         |  |      |     |      |  |                        ┃       ┃        |  |     |      |      |    |       |         
-             |         |  |      |     |      |  |┏━━━━━━━━━━━━━━━━━━━━━━━┫  USB  ┣━━━━━━━┓|  |     |      |      |    |       |      
-             |         |  |      |     |      |  |┃                       ┃       ┃       ┃|  |     |      |      |    |       |   
-             |         |  |      |     |      |  |┃                       ┗━━━━━━━┛       ┃|  |     |      |      |    |       |   
-             |         |  |      |     |      |  |┃                                       ┃|  |     |      |      |    |       |   
-             |         |  |      |     |      |  |┃                                ◎ ◎    ┃|  |     |      |      |    |       |                   
-             |         |  |      |     |      |  |┃                          ▓▓▓   ◎ ◎   ◎┃|18|D19  | PC5  |      |    | SCL   | PCINT13 
-             |         |  |      |     |      |  |┃                          ▓▓▓   ◎ ◎   ◎┃|17|D18  | PC4  |      |    | SDA   | PCINT12 
-             |         |  |      |     |      |  |┃                                      ◎┃|16|AREF |      |      |    |       | 
-             |         |  |      |     |      |  |┃                                      ▣┃|15|GND  |      |      |    |       | 
-             |         |  |      |     | NC   |19|┃◎        ▓▓▓▓▓▓                [LED]┃ ◎┃|14|D13  | PB5  |      |    | SCK   | PCINT5 
-             |         |  |      |     |IOref |10|┃◎        ▓▓▓▓▓▓                     ┃ ◎┃|13|D12  | PB4  |      |    | MISO  | PCINT4 
-     PCINT14 |         |  |      | PC6 |Reset |20|┃◎        ▓▓▓▓▓▓                   P ┃ ◎┃|12|D11  | PB3  |      |OC2A| MOSI  | PCINT3 
-             |         |  |      |     |+3.3V |21|┃◎ ┃ P    ▓▓▓▓▓▓                   W ┃ ◎┃|11|D10  | PB2  |      |OC1B| SS    | PCINT2 
-             |         |  |      |     |+5V   |22|┃◎ ┃ O    ▓▓▓▓▓▓                   M ┃ ◎┃|10|D9   | PB1  |      |OC1A|       | PCINT1 
-             |         |  |      |     |GND   |23|┃▣ ┃ W    ▓▓▓▓▓▓                     ┃ ◎┃| 9|D8   | PB0  |      |    |       | PCINT0 
-             |         |  |      |     |GND   |24|┃▣ ┃ E    ▓▓▓▓▓▓                        ┃|  |     |      |      |    |       |  
-             |         |  |      |     |Vin   |25|┃◎ ┃ R    ▓▓▓▓▓▓                   D ┃ ◎┃| 8|D7   | PD7  | AIN1 |    |       | PCINT23 
-             |         |  |      |     |      |  |┃         ▓▓▓▓▓▓                   I ┃ ◎┃| 7|D6   | PD6  | AIN0 |OC0A|       | PCINT22 
-     PCINT8  |         |  |ADC0  | PC0 |D14   |26|┃◎ ┃ A    ▓▓▓▓▓▓                   G ┃ ◎┃| 6|D5   | PD5  |      |OC0B|       | PCINT21 
-     PCINT9  |         |  |ADC1  | PC1 |D15   |27|┃◎ ┃ N    ▓▓▓▓▓▓                   I ┃ ◎┃| 5|D4   | PD4  |      | T0 |       | PCINT20 
-     PCINT10 |         |  |ADC2  | PC2 |D16   |28|┃◎ ┃ A    ▓▓▓▓▓▓   ┏━━━┓           T ┃ ◎┃| 4|D3   | PD3  |      |OC2B| INT1  | PCINT19      
-     PCINT11 |         |  |ADC3  | PC3 |D17   |29|┃◎ ┃ L    ▓▓▓▓▓▓   ┃ ◎ ┃           A ┃ ◎┃| 3|D2   | PD2  |      |    | INT0  | PCINT18 
-     PCINT12 |  SDA    |  |ADC4  | PC4 |D18   |30|┃◎ ┃ O    ▓▓▓▓▓▓   ┗━━━┛           L ┃ ◎┃| 2|D1   | PD1  |      |    | TXD   | PCINT17 
-     PCINT13 |  SCL    |  |ADC5  | PC5 |D19   |31|┃◎ ┃ G    ▓▓▓▓▓▓   ◎ ◎ ◎             ┃ ◎┃| 1|D0   | PD0  |      |    | RXD   | PCINT16 
-             |         |  |      |     |      |  |┗━┓                ◎ ◎ ◎     ┏━━━━━━━━━━┛|  |     |      |      |    |       |         
-             |         |  |      |     |      |  |  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━┛           |  |     |      |      |    |       |         
-"""
+    board_name="Arduino Uno",
+    mcu_name="ATMega328p",
+    ground_pins=[15, 23, 24],
+    power_pins=[21, 22, 25],
+    reset_pins=[20],
+    nc_pins=[19],
+    columns=["pin", "analog", "timer", "com", "interrupt"],
+    pinout="""
+             |         |  |      |     |      |  |                        ┏━━━━━━━┓        |  |     |      |      |    |       |
+             |         |  |      |     |      |  |                        ┃       ┃        |  |     |      |      |    |       |
+             |         |  |      |     |      |  |┏━━━━━━━━━━━━━━━━━━━━━━━┫  USB  ┣━━━━━━━┓|  |     |      |      |    |       |
+             |         |  |      |     |      |  |┃                       ┃       ┃       ┃|  |     |      |      |    |       |
+             |         |  |      |     |      |  |┃                       ┗━━━━━━━┛       ┃|  |     |      |      |    |       |
+             |         |  |      |     |      |  |┃                                       ┃|  |     |      |      |    |       |
+             |         |  |      |     |      |  |┃                                ◎ ◎    ┃|  |     |      |      |    |       |
+             |         |  |      |     |      |  |┃                          ▓▓▓   ◎ ◎   ◎┃|18|D19  | PC5  |      |    | SCL   | PCINT13
+             |         |  |      |     |      |  |┃                          ▓▓▓   ◎ ◎   ◎┃|17|D18  | PC4  |      |    | SDA   | PCINT12
+             |         |  |      |     |      |  |┃                                      ◎┃|16|AREF |      |      |    |       |
+             |         |  |      |     |      |  |┃                                      ▣┃|15|GND  |      |      |    |       |
+             |         |  |      |     | NC   |19|┃◎        ▓▓▓▓▓▓                [LED]┃ ◎┃|14|D13  | PB5  |      |    | SCK   | PCINT5
+             |         |  |      |     |IOref |10|┃◎        ▓▓▓▓▓▓                     ┃ ◎┃|13|D12  | PB4  |      |    | MISO  | PCINT4
+     PCINT14 |         |  |      | PC6 |Reset |20|┃◎        ▓▓▓▓▓▓                   P ┃ ◎┃|12|D11  | PB3  |      |OC2A| MOSI  | PCINT3
+             |         |  |      |     |+3.3V |21|┃◎ ┃ P    ▓▓▓▓▓▓                   W ┃ ◎┃|11|D10  | PB2  |      |OC1B| SS    | PCINT2
+             |         |  |      |     |+5V   |22|┃◎ ┃ O    ▓▓▓▓▓▓                   M ┃ ◎┃|10|D9   | PB1  |      |OC1A|       | PCINT1
+             |         |  |      |     |GND   |23|┃▣ ┃ W    ▓▓▓▓▓▓                     ┃ ◎┃| 9|D8   | PB0  |      |    |       | PCINT0
+             |         |  |      |     |GND   |24|┃▣ ┃ E    ▓▓▓▓▓▓                        ┃|  |     |      |      |    |       |
+             |         |  |      |     |Vin   |25|┃◎ ┃ R    ▓▓▓▓▓▓                   D ┃ ◎┃| 8|D7   | PD7  | AIN1 |    |       | PCINT23
+             |         |  |      |     |      |  |┃         ▓▓▓▓▓▓                   I ┃ ◎┃| 7|D6   | PD6  | AIN0 |OC0A|       | PCINT22
+     PCINT8  |         |  |ADC0  | PC0 |D14   |26|┃◎ ┃ A    ▓▓▓▓▓▓                   G ┃ ◎┃| 6|D5   | PD5  |      |OC0B|       | PCINT21
+     PCINT9  |         |  |ADC1  | PC1 |D15   |27|┃◎ ┃ N    ▓▓▓▓▓▓                   I ┃ ◎┃| 5|D4   | PD4  |      | T0 |       | PCINT20
+     PCINT10 |         |  |ADC2  | PC2 |D16   |28|┃◎ ┃ A    ▓▓▓▓▓▓   ┏━━━┓           T ┃ ◎┃| 4|D3   | PD3  |      |OC2B| INT1  | PCINT19
+     PCINT11 |         |  |ADC3  | PC3 |D17   |29|┃◎ ┃ L    ▓▓▓▓▓▓   ┃ ◎ ┃           A ┃ ◎┃| 3|D2   | PD2  |      |    | INT0  | PCINT18
+     PCINT12 |  SDA    |  |ADC4  | PC4 |D18   |30|┃◎ ┃ O    ▓▓▓▓▓▓   ┗━━━┛           L ┃ ◎┃| 2|D1   | PD1  |      |    | TXD   | PCINT17
+     PCINT13 |  SCL    |  |ADC5  | PC5 |D19   |31|┃◎ ┃ G    ▓▓▓▓▓▓   ◎ ◎ ◎             ┃ ◎┃| 1|D0   | PD0  |      |    | RXD   | PCINT16
+             |         |  |      |     |      |  |┗━┓                ◎ ◎ ◎     ┏━━━━━━━━━━┛|  |     |      |      |    |       |
+             |         |  |      |     |      |  |  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━┛           |  |     |      |      |    |       |
+""",
 )
 arduino_mega = Pinout(
-    board_name = "Arduino Mega",
-    mcu_name = "ATMega2560",
-    ground_pins = [23, 32, 33],
-    power_pins = [30, 31, 34],
-    adc_pins = [], 
-    reset_pins = [29],
-    nc_pins = [27],
-    columns = ["pin", "analog", "timer", "com", "interrupt"],
-    pinout = """
-             |        |   |       |     |      |  |                        ┏━━━━━━━┓       |  |     |      |    |    |       |         
-             |        |   |       |     |      |  |                        ┃       ┃       |  |     |      |    |    |       |         
-             |        |   |       |     |      |  |┏━━━━━━━━━━━━━━━━━━━━━━━┫  USB  ┣━━━━━━┓|  |     |      |    |    |       |      
-             |        |   |       |     |      |  |┃                       ┃       ┃      ┃|  |     |      |    |    |       |   
-             |        |   |       |     |      |  |┃                       ┗━━━━━━━┛      ┃|  |     |      |    |    |       |   
-             |        |   |       |     |      |  |┃                                      ┃|  |     |      |    |    |       |       
-             |        |   |       |     |      |  |┃                                     ◎┃|26|D21  | PD0  |    |    | SCL   | INT0 
-             |        |   |       |     |      |  |┃                                     ◎┃|25|D20  | PD1  |    |    | SDA   | INT1     
-             |        |   |       |     |      |  |┃                                     ◎┃|24|AREF |      |    |    |       |  
-             |        |   |       |     |      |  |┃                                     ◎┃|23|GND  |      |    |    |       |  
-             |        |   |       |     | NC   |27|┃◎                              [LED] ◎┃|22|D13  | PB7  |    |OC0A|       | PCINT7 
-             |        |   |       |     |IOref |28|┃▣                                    ◎┃|21|D12  | PB6  |    |OC1B|       | PCINT6 
-             |        |   |       |     |Reset |29|┃◎                                    ◎┃|20|D11  | PB5  |    |OC1A|       | PCINT5 
-             |        |   |       |     |+3.3V |30|┃▣                                    ◎┃|19|D10  | PB4  |    |OC2A|       | PCINT4 
-             |        |   |       |     |+5V   |31|┃▣                                    ◎┃|18|D9   | PH6  |    |OC2B|       |  
-             |        |   |       |     |GND   |32|┃▣                                    ◎┃|17|D8   | PH5  |    |OC4C|       |  
-             |        |   |       |     |GND   |33|┃▣                                     ┃|  |     |      |    |    |       |  
-             |        |   |       |     |Vin   |34|┃▣            ▓▓▓▓▓▓▓▓▓▓▓             ◎┃|16|D7   | PH4  |    |OC4B|       |                       
+    board_name="Arduino Mega",
+    mcu_name="ATMega2560",
+    ground_pins=[23, 32, 33],
+    power_pins=[30, 31, 34],
+    adc_pins=[],
+    reset_pins=[29],
+    nc_pins=[27],
+    columns=["pin", "analog", "timer", "com", "interrupt"],
+    pinout="""
+             |        |   |       |     |      |  |                        ┏━━━━━━━┓       |  |     |      |    |    |       |
+             |        |   |       |     |      |  |                        ┃       ┃       |  |     |      |    |    |       |
+             |        |   |       |     |      |  |┏━━━━━━━━━━━━━━━━━━━━━━━┫  USB  ┣━━━━━━┓|  |     |      |    |    |       |
+             |        |   |       |     |      |  |┃                       ┃       ┃      ┃|  |     |      |    |    |       |
+             |        |   |       |     |      |  |┃                       ┗━━━━━━━┛      ┃|  |     |      |    |    |       |
+             |        |   |       |     |      |  |┃                                      ┃|  |     |      |    |    |       |
+             |        |   |       |     |      |  |┃                                     ◎┃|26|D21  | PD0  |    |    | SCL   | INT0
+             |        |   |       |     |      |  |┃                                     ◎┃|25|D20  | PD1  |    |    | SDA   | INT1
+             |        |   |       |     |      |  |┃                                     ◎┃|24|AREF |      |    |    |       |
+             |        |   |       |     |      |  |┃                                     ◎┃|23|GND  |      |    |    |       |
+             |        |   |       |     | NC   |27|┃◎                              [LED] ◎┃|22|D13  | PB7  |    |OC0A|       | PCINT7
+             |        |   |       |     |IOref |28|┃▣                                    ◎┃|21|D12  | PB6  |    |OC1B|       | PCINT6
+             |        |   |       |     |Reset |29|┃◎                                    ◎┃|20|D11  | PB5  |    |OC1A|       | PCINT5
+             |        |   |       |     |+3.3V |30|┃▣                                    ◎┃|19|D10  | PB4  |    |OC2A|       | PCINT4
+             |        |   |       |     |+5V   |31|┃▣                                    ◎┃|18|D9   | PH6  |    |OC2B|       |
+             |        |   |       |     |GND   |32|┃▣                                    ◎┃|17|D8   | PH5  |    |OC4C|       |
+             |        |   |       |     |GND   |33|┃▣                                     ┃|  |     |      |    |    |       |
+             |        |   |       |     |Vin   |34|┃▣            ▓▓▓▓▓▓▓▓▓▓▓             ◎┃|16|D7   | PH4  |    |OC4B|       |
              |        |   |       |     |      |  |┃             ▓▓▓▓▓▓▓▓▓▓▓             ◎┃|15|D6   | PH3  |    |OC4A|       | PCINT8
-             |        |   | ADC0  | PF0 |D54   |35|┃◎            ▓▓▓▓▓▓▓▓▓▓▓             ◎┃|14|D5   | PE3  |AIN1|OC3A|       |  
-             |        |   | ADC1  | PF1 |D55   |36|┃▣            ▓▓▓▓▓▓▓▓▓▓▓             ◎┃|13|D4   | PG5  |    |OC0B|       |  
-             |        |   | ADC2  | PF2 |D56   |37|┃◎            ▓▓▓▓▓▓▓▓▓▓▓             ◎┃|12|D3   | PE5  |    |OC3C|       | INT5 
-             |        |   | ADC3  | PF3 |D57   |38|┃▣                                    ◎┃|11|D2   | PE4  |    |OC3B|       | INT4 
-             |  TCK   |   | ADC4  | PF4 |D58   |39|┃▣               ◎ ◎ ◎                ◎┃|10|D1   | PE1  |    |    | TXD0  | PCINT3 
-             |  TMS   |   | ADC5  | PF5 |D59   |41|┃▣               ◎ ◎ ◎                ◎┃| 9|D0   | PE0  |    |    | RXD0  | PCINT8 
-             |  TDO   |   | ADC6  | PF6 |D60   |42|┃▣                                     ┃|  |     |      |    |    |       |  
-             |  TDI   |   | ADC7  | PF7 |D61   |43|┃▣                                    ◎┃| 8|D14  | PJ1  |    |    | TXD3  | PCINT10 
-             |        |   |       |     |      |  |┃                                     ◎┃| 7|D15  | PJ0  |    |    | RXD3  | PCINT9 
-    PCINT16  |        |   | ADC8  | PK0 |D62   |44|┃◎                                    ◎┃| 6|D16  | PH1  |    |    | TXD2  |  
-    PCINT17  |        |   | ADC9  | PK1 |D63   |45|┃◎                                    ◎┃| 5|D17  | PH0  |    |    | RXD2  |  
-    PCINT18  |        |   | ADC10 | PK2 |D64   |46|┃◎                                    ◎┃| 4|D18  | PD3  |    |    | TXD1  | INT3 
-    PCINT19  |        |   | ADC11 | PK3 |D65   |47|┃◎                                    ◎┃| 3|D19  | PD2  |    |    | RXD1  | INT2 
-    PCINT20  |        |   | ADC12 | PK4 |D66   |48|┃◎                                    ◎┃| 2|D20  | PD1  |    |    | SDA   | INT1      
-    PCINT21  |        |   | ADC13 | PK5 |D67   |49|┃◎                                    ◎┃| 1|D21  | PD0  |    |    | SCL   | INT0 
-    PCINT22  |        |   | ADC14 | PK6 |D68   |50|┃◎                                     ┃|  |     |      |    |    |       |  
+             |        |   | ADC0  | PF0 |D54   |35|┃◎            ▓▓▓▓▓▓▓▓▓▓▓             ◎┃|14|D5   | PE3  |AIN1|OC3A|       |
+             |        |   | ADC1  | PF1 |D55   |36|┃▣            ▓▓▓▓▓▓▓▓▓▓▓             ◎┃|13|D4   | PG5  |    |OC0B|       |
+             |        |   | ADC2  | PF2 |D56   |37|┃◎            ▓▓▓▓▓▓▓▓▓▓▓             ◎┃|12|D3   | PE5  |    |OC3C|       | INT5
+             |        |   | ADC3  | PF3 |D57   |38|┃▣                                    ◎┃|11|D2   | PE4  |    |OC3B|       | INT4
+             |  TCK   |   | ADC4  | PF4 |D58   |39|┃▣               ◎ ◎ ◎                ◎┃|10|D1   | PE1  |    |    | TXD0  | PCINT3
+             |  TMS   |   | ADC5  | PF5 |D59   |41|┃▣               ◎ ◎ ◎                ◎┃| 9|D0   | PE0  |    |    | RXD0  | PCINT8
+             |  TDO   |   | ADC6  | PF6 |D60   |42|┃▣                                     ┃|  |     |      |    |    |       |
+             |  TDI   |   | ADC7  | PF7 |D61   |43|┃▣                                    ◎┃| 8|D14  | PJ1  |    |    | TXD3  | PCINT10
+             |        |   |       |     |      |  |┃                                     ◎┃| 7|D15  | PJ0  |    |    | RXD3  | PCINT9
+    PCINT16  |        |   | ADC8  | PK0 |D62   |44|┃◎                                    ◎┃| 6|D16  | PH1  |    |    | TXD2  |
+    PCINT17  |        |   | ADC9  | PK1 |D63   |45|┃◎                                    ◎┃| 5|D17  | PH0  |    |    | RXD2  |
+    PCINT18  |        |   | ADC10 | PK2 |D64   |46|┃◎                                    ◎┃| 4|D18  | PD3  |    |    | TXD1  | INT3
+    PCINT19  |        |   | ADC11 | PK3 |D65   |47|┃◎                                    ◎┃| 3|D19  | PD2  |    |    | RXD1  | INT2
+    PCINT20  |        |   | ADC12 | PK4 |D66   |48|┃◎                                    ◎┃| 2|D20  | PD1  |    |    | SDA   | INT1
+    PCINT21  |        |   | ADC13 | PK5 |D67   |49|┃◎                                    ◎┃| 1|D21  | PD0  |    |    | SCL   | INT0
+    PCINT22  |        |   | ADC14 | PK6 |D68   |50|┃◎                                     ┃|  |     |      |    |    |       |
     PCINT23  |        |   | ADC15 | PK7 |D69   |51|┃◎                                     ┃|  |     |      |    |    |       |
-             |        |   |       |     |      |  |┃   ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎┃|  |     |      |    |    |       |  
-             |        |   |       |     |      |  |┃   ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎┃|  |     |      |    |    |       |  
-             |        |   |       |     |      |  |┗━┓                        ┏━━━━━━━━━━━┛|  |     |      |    |    |       |         
-             |        |   |       |     |      |  |  ┗━━━━━━━━━━━━━━━━━━━━━━━━┛            |  |     |      |    |    |       | 
-""")
+             |        |   |       |     |      |  |┃   ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎┃|  |     |      |    |    |       |
+             |        |   |       |     |      |  |┃   ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎ ◎┃|  |     |      |    |    |       |
+             |        |   |       |     |      |  |┗━┓                        ┏━━━━━━━━━━━┛|  |     |      |    |    |       |
+             |        |   |       |     |      |  |  ┗━━━━━━━━━━━━━━━━━━━━━━━━┛            |  |     |      |    |    |       |
+""",
+)
 
 
 ET_AVR_STAMP = Pinout(
-    board_name = "ET-AVR Stamp",
-    mcu_name = "ATMega128-16AU",
-    ground_pins = [50],
-    power_pins = [25],
-    adc_pins = [], 
-    reset_pins = [23],
-    nc_pins = [],
-    columns = ["pin", "analog", "timer", "com", "interrupt"],
-    pinout = """
-             |        |   |       |     |     |  |┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓|  |     |      |    |    |       |               
-             | RXD0   |   |       | PE0 |     |26|┃◎          ◎ ◎ ◎ ◎ ◎             ◎┃|25|+5V  |      |    |    |       |  
-             | TXD0   |   |       | PE1 |     |27|┃◎          ◎ ◎ ◎ ◎ ◎             ◎┃|24|PEN  |      |    |    |       |  
-             |        |   | AIN0  | PE2 |     |28|┃◎             ISP                ◎┃|23|Reset|      |    |    |       |  
-             |        |   | AIN1  | PE3 |     |29|┃◎                                ◎┃|22|VREF |      |    |    |       |  
-             |        |   |       | PE4 |     |30|┃◎                                ◎┃|21|     | Pg4  |    |    |       |  
-             |        |   |       | PE5 |     |31|┃◎                                ◎┃|20|     | Pg3  |    |    |       |  
-             |        |   |       | PE6 |     |32|┃◎                                ◎┃|19|     | Pg2  |    |    |       |  
-             |        |   |       | PE7 |     |33|┃◎                                ◎┃|18|     | Pg1  |    |    |       | 
-             |        |   |       | PB0 |     |34|┃◎                                ◎┃|17|     | Pg0  |    |    |       | 
-             |        |   |       | PB1 |     |35|┃◎                                ◎┃|16|     | PF7  | ADC7   |    | TDI   |                      
-             |        |   |       | PB2 |     |36|┃◎            ATMega128           ◎┃|15|     | PF6  | ADC6   |    | TDO   | 
-             |        |   |       | PB3 |     |37|┃◎           ▓▓▓▓▓▓▓▓▓▓▓          ◎┃|14|     | PF5  | ADC5   |    | TMS   | 
-             |        |   |       | PB4 |     |38|┃◎           ▓▓▓▓▓▓▓▓▓▓▓          ◎┃|13|     | PF4  | ADC4   |    | TCK   | 
-             |        |   |       | PB5 |     |39|┃◎           ▓▓▓▓▓▓▓▓▓▓▓          ◎┃|12|     | PF3  | ADC3   |    |       | 
-             |        |   |       | PB6 |     |40|┃◎           ▓▓▓▓▓▓▓▓▓▓▓          ◎┃|11|     | PF2  | ADC2   |    |       | 
-             |        |   |       | PB7 |     |41|┃◎           ▓▓▓▓▓▓▓▓▓▓▓          ◎┃|10|     | PF1  | ADC1   |    |       |  
-             |        |   |       | PD0 |     |42|┃◎                                ◎┃| 9|     | PF0  | ADC0   |    |       |  
-             |        |   |       | PD1 |     |43|┃◎                                ◎┃| 8|     | PA7  |    |    |       |  
-             |        |   |       | PD2 |     |44|┃◎                                ◎┃| 7|     | PA6  |    |    |       |  
-             |        |   |       | PD3 |     |45|┃◎                                ◎┃| 6|     | PA5  |    |    |       |  
-             |        |   |       | PD4 |     |46|┃◎                                ◎┃| 5|     | PA4  |    |    |       |  
-             |        |   |       | PD5 |     |47|┃◎                                ◎┃| 4|     | PA3  |    |    |       |  
-             |        |   |       | PD6 |     |48|┃◎  ┏━━━┓              PortC      ◎┃| 3|     | PA2  |    |    |       |  
-             |        |   |       | PD7 |     |49|┃◎  ┃ ◎ ┃            ◎ ◎ ◎ ◎ ◎    ◎┃| 2|     | PA1  |    |    |       |       
-             |        |   |       |     | GND |50|┃▣  ┗━━━┛            ◎ ◎ ◎ ◎ ◎    ◎┃| 1|     | PA0  |    |    |       |  
-             |        |   |       |     |     |  |┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛|  |     |      |    |    |       |         
-""")
+    board_name="ET-AVR Stamp",
+    mcu_name="ATMega128-16AU",
+    ground_pins=[50],
+    power_pins=[25],
+    adc_pins=[],
+    reset_pins=[23],
+    nc_pins=[],
+    columns=["pin", "analog", "timer", "com", "interrupt"],
+    pinout="""
+             |        |   |       |     |     |  |┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓|  |     |      |      |    |       |
+             | RXD0   |   |       | PE0 |     |26|┃◎          ◎ ◎ ◎ ◎ ◎             ◎┃|25|+5V  |      |      |    |       |
+             | TXD0   |   |       | PE1 |     |27|┃◎          ◎ ◎ ◎ ◎ ◎             ◎┃|24|PEN  |      |      |    |       |
+             |        |   | AIN0  | PE2 |     |28|┃◎             ISP                ◎┃|23|Reset|      |      |    |       |
+             |        |   | AIN1  | PE3 |     |29|┃◎                                ◎┃|22|VREF |      |      |    |       |
+             |        |   |       | PE4 |     |30|┃◎                                ◎┃|21|     | Pg4  |      |    |       |
+             |        |   |       | PE5 |     |31|┃◎                                ◎┃|20|     | Pg3  |      |    |       |
+             |        |   |       | PE6 |     |32|┃◎                                ◎┃|19|     | Pg2  |      |    |       |
+             |        |   |       | PE7 |     |33|┃◎                                ◎┃|18|     | Pg1  |      |    |       |
+             |        |   |       | PB0 |     |34|┃◎                                ◎┃|17|     | Pg0  |      |    |       |
+             |        |   |       | PB1 |     |35|┃◎                                ◎┃|16|     | PF7  | ADC7 |    | TDI   |
+             |        |   |       | PB2 |     |36|┃◎            ATMega128           ◎┃|15|     | PF6  | ADC6 |    | TDO   |
+             |        |   |       | PB3 |     |37|┃◎           ▓▓▓▓▓▓▓▓▓▓▓          ◎┃|14|     | PF5  | ADC5 |    | TMS   |
+             |        |   |       | PB4 |     |38|┃◎           ▓▓▓▓▓▓▓▓▓▓▓          ◎┃|13|     | PF4  | ADC4 |    | TCK   |
+             |        |   |       | PB5 |     |39|┃◎           ▓▓▓▓▓▓▓▓▓▓▓          ◎┃|12|     | PF3  | ADC3 |    |       |
+             |        |   |       | PB6 |     |40|┃◎           ▓▓▓▓▓▓▓▓▓▓▓          ◎┃|11|     | PF2  | ADC2 |    |       |
+             |        |   |       | PB7 |     |41|┃◎           ▓▓▓▓▓▓▓▓▓▓▓          ◎┃|10|     | PF1  | ADC1 |    |       |
+             |        |   |       | PD0 |     |42|┃◎                                ◎┃| 9|     | PF0  | ADC0 |    |       |
+             |        |   |       | PD1 |     |43|┃◎                                ◎┃| 8|     | PA7  |      |    |       |
+             |        |   |       | PD2 |     |44|┃◎                                ◎┃| 7|     | PA6  |      |    |       |
+             |        |   |       | PD3 |     |45|┃◎                                ◎┃| 6|     | PA5  |      |    |       |
+             |        |   |       | PD4 |     |46|┃◎                                ◎┃| 5|     | PA4  |      |    |       |
+             |        |   |       | PD5 |     |47|┃◎                                ◎┃| 4|     | PA3  |      |    |       |
+             |        |   |       | PD6 |     |48|┃◎  ┏━━━┓              PortC      ◎┃| 3|     | PA2  |      |    |       |
+             |        |   |       | PD7 |     |49|┃◎  ┃ ◎ ┃            ◎ ◎ ◎ ◎ ◎    ◎┃| 2|     | PA1  |      |    |       |
+             |        |   |       |     | GND |50|┃▣  ┗━━━┛            ◎ ◎ ◎ ◎ ◎    ◎┃| 1|     | PA0  |      |    |       |
+             |        |   |       |     |     |  |┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛|  |     |      |      |    |       |
+""",
+)
 
 
 arduino_mega_con = Pinout(
-    board_name = "Arduino Mega connector",
-    ground_pins = [23, 32, 33],
-    power_pins = [30, 31, 34],
-    adc_pins = [], 
-    reset_pins = [29],
-    nc_pins = [27],
-    columns = ["pin", "analog", "timer", "com", "interrupt"],
-    pinout = """    
-             |     |    |     |     |     |  |  ┏━━━━┓    |  |     |      |      |      |    |  
-             |     |    |     |     | +5V |  |  ┃◎  ◎┃    |  | +5V |      |      |      |    |  
-             |     |    |ADC0 | PA0 |     |22|  ┃◎  ◎┃    |23|     | PA1  |ADC1  |      |    |  
-             |     |    |ADC2 | PA2 |     |24|  ┃◎  ◎┃    |25|     | PA3  |ADC3  |      |    | 
-             |     |    |ADC4 | PA4 |     |26|  ┃◎  ◎┃    |27|     | PA5  |ADC5  |      |    |  
-             |     |    |ADC6 | PA6 |     |28|  ┃◎  ◎┃    |29|     | PA7  |ADC7  |      |    |  
-             |     |    |ADC15| PC7 |     |30|  ┃◎  ◎┗━┓  |31|     | PC6  |ADC14 |      |    |  
-             |     |    |ADC13| PC5 |     |32|  ┃◎  ◎  ┃  |33|     | PC4  |ADC12 |      |    |  
-             |     |    |ADC11| PC3 |     |34|  ┃◎  ◎  ┃  |35|     | PC2  |ADC10 |      |    |  
-             |     |    |ADC9 | PC1 |     |36|  ┃◎  ◎  ┃  |37|     | PC0  |ADC8  |      |    |  
-             |     |    |     | PD7 |     |38|  ┃◎  ◎  ┃  |39|     | PG2  |      |      |    |  
-             |     |    |     | PG1 |     |40|  ┃◎  ◎  ┃  |41|     | PG0  |      |      |    |  
-             |     |    |     | PL7 |     |42|  ┃◎  ◎  ┃  |43|     | PL6  |      |      |    |  
-             |     |OC5C|     | PL5 |     |44|  ┃◎  ◎  ┃  |45|     | PL4  |      |OC5B  |    |  
-             |     |OC5A|     | PL3 |     |46|  ┃◎  ◎  ┃  |47|     | PL2  |      |T5    |    |  
-             |     |    |     | PL1 |     |48|  ┃◎  ◎  ┃  |49|     | PL0  |      |      |    |  
-       PCINT3|MISO |    |     | PB3 |     |50|  ┃◎  ◎  ┃  |51|     | PB2  |      |      |MOSI|PCINT2  
-       PCINT1|SCK  |    |     | PB1 |     |52|  ┃◎  ◎  ┃  |53|     | PB0  |      |      | SS |PCINT0  
-             |     |    |     |     | GND |  |  ┃◎  ◎  ┃  |  |GND  |      |      |      |    |  
-             |     |    |     |     |     |  |  ┃    ┏━┛  |  |     |      |      |      |    |  
-             |     |    |     |     |     |  |  ┃    ┃    |  |     |      |      |      |    |  
-             |     |    |     |     |     |  |  ┗━━━━┛    |  |     |      |      |      |    |   
-"""
+    board_name="Arduino Mega connector",
+    ground_pins=[23, 32, 33],
+    power_pins=[30, 31, 34],
+    adc_pins=[],
+    reset_pins=[29],
+    nc_pins=[27],
+    columns=["pin", "analog", "timer", "com", "interrupt"],
+    pinout="""    
+             |     |    |     |     |     |  |  ┏━━━━┓    |  |     |      |      |      |    |
+             |     |    |     |     | +5V |  |  ┃◎  ◎┃    |  | +5V |      |      |      |    |
+             |     |    |ADC0 | PA0 |     |22|  ┃◎  ◎┃    |23|     | PA1  |ADC1  |      |    |
+             |     |    |ADC2 | PA2 |     |24|  ┃◎  ◎┃    |25|     | PA3  |ADC3  |      |    |
+             |     |    |ADC4 | PA4 |     |26|  ┃◎  ◎┃    |27|     | PA5  |ADC5  |      |    |
+             |     |    |ADC6 | PA6 |     |28|  ┃◎  ◎┃    |29|     | PA7  |ADC7  |      |    |
+             |     |    |ADC15| PC7 |     |30|  ┃◎  ◎┗━┓  |31|     | PC6  |ADC14 |      |    |
+             |     |    |ADC13| PC5 |     |32|  ┃◎  ◎  ┃  |33|     | PC4  |ADC12 |      |    |
+             |     |    |ADC11| PC3 |     |34|  ┃◎  ◎  ┃  |35|     | PC2  |ADC10 |      |    |
+             |     |    |ADC9 | PC1 |     |36|  ┃◎  ◎  ┃  |37|     | PC0  |ADC8  |      |    |
+             |     |    |     | PD7 |     |38|  ┃◎  ◎  ┃  |39|     | PG2  |      |      |    |
+             |     |    |     | PG1 |     |40|  ┃◎  ◎  ┃  |41|     | PG0  |      |      |    |
+             |     |    |     | PL7 |     |42|  ┃◎  ◎  ┃  |43|     | PL6  |      |      |    |
+             |     |OC5C|     | PL5 |     |44|  ┃◎  ◎  ┃  |45|     | PL4  |      |OC5B  |    |
+             |     |OC5A|     | PL3 |     |46|  ┃◎  ◎  ┃  |47|     | PL2  |      |T5    |    |
+             |     |    |     | PL1 |     |48|  ┃◎  ◎  ┃  |49|     | PL0  |      |      |    |
+       PCINT3|MISO |    |     | PB3 |     |50|  ┃◎  ◎  ┃  |51|     | PB2  |      |      |MOSI|PCINT2
+       PCINT1|SCK  |    |     | PB1 |     |52|  ┃◎  ◎  ┃  |53|     | PB0  |      |      | SS |PCINT0
+             |     |    |     |     | GND |  |  ┃◎  ◎  ┃  |  |GND  |      |      |      |    |
+             |     |    |     |     |     |  |  ┃    ┏━┛  |  |     |      |      |      |    |
+             |     |    |     |     |     |  |  ┃    ┃    |  |     |      |      |      |    |
+             |     |    |     |     |     |  |  ┗━━━━┛    |  |     |      |      |      |    |
+""",
 )
 
 raspberry_pi4 = Pinout(
-    board_name = "Raspberry Pi 4 GPIO header",
+    board_name="Raspberry Pi 4 GPIO header",
     mcu_name="BCM2711",
-    ground_pins = [6, 9, 14, 20, 25, 30, 34, 39],
-    power_pins = [1,2,4,17],
-    adc_pins = [], 
-    reset_pins = [],
-    nc_pins = [],
-    columns = ["pin", "analog", "timer", "com", "interrupt"],
-    pinout = """    
-             |         |      |     |   |      |  |  ┏━━━━┓  |  |      |     |     |      |         |  
-             |         |      |     |   | 3.3V |1 |  ┃▣  ◎┃  |2 |5V    |     |     |      |         |  
-             |I2C1 SDA1|      |     |   |GPIO2 |3 |  ┃◎  ◎┃  |4 |5V    |     |     |      |         | 
-             |I2C1 SCL1|      |     |   |GPIO3 |5 |  ┃◎  ◎┃  |6 |GND   |     |     |      |         |  
-             |         |      |     |   |GPIO4 |7 |  ┃◎  ◎┃  |8 |GPIO14|     |     |      | TXD0    |  
-             |         |      |     |   | GND  |9 |  ┃◎  ◎┃  |10|GPIO15|     |     |      | RXD0    |  
-             |         |      |     |   |GPIO17|11|  ┃◎  ◎┃  |12|GPIO18|     |     |PWM 1 |         |  
-             |         |      |     |   |GPIO27|13|  ┃◎  ◎┃  |14|GND   |     |     |      |         |  
-             |         |      |     |   |GPIO22|15|  ┃◎  ◎┃  |16|GPIO23|     |     |      |         |  
-             |         |      |     |   | 3.3V |17|  ┃◎  ◎┃  |18|GPIO24|     |     |      |         |
-             |SPI MOSI |      |     |   |GPIO10|19|  ┃◎  ◎┃  |20|GND   |     |     |      |         |
-             |SPI MISO |      |     |   |GPIO9 |21|  ┃◎  ◎┃  |22|GPIO25|     |     |      |         |
-             |SPI CLK  |      |     |   |GPIO11|23|  ┃◎  ◎┃  |24|GPIO8 |     |     |      |SPI CS0  |
-             |         |      |     |   | GND  |25|  ┃◎  ◎┃  |26|GPIO7 |     |     |      |SPI CS1  |
-             | ID_SD   |      |     |   |GPIO0 |27|  ┃◎  ◎┃  |28|GPIO1 |     |     |      | ID_SC   |
-             |         |      |     |   |GPIO05|29|  ┃◎  ◎┃  |30|GND   |     |     |      |         |   
-             |         |      |     |   |GPIO06|31|  ┃◎  ◎┃  |32|GPIO12|     |     |      |         |   
-             |         |      |     |   |GPIO13|33|  ┃◎  ◎┃  |34|GND   |     |     |      |         |  
-             |SPI1 MISO| PWM 2|     |   |GPIO19|35|  ┃◎  ◎┃  |36|GPIO16|     |     |PWM 1 |SPI1 CS0 |  
-             |         | PWM 2|     |   |GPIO26|37|  ┃◎  ◎┃  |38|GPIO20|     |     |      |SPI1 MOSI|  
-             |         |      |     |   | GND  |39|  ┃◎  ◎┃  |40|GPIO21|     |     |      |SPI1_SCLK|    
-             |         |      |     |   |      |  |  ┗━━━━┛  |  |      |     |     |      |         |    
-"""
+    ground_pins=[6, 9, 14, 20, 25, 30, 34, 39],
+    power_pins=[1, 2, 4, 17],
+    adc_pins=[],
+    reset_pins=[],
+    nc_pins=[],
+    columns=["pin", "analog", "timer", "com", "interrupt"],
+    pinout="""  
+             |          |      |     |   |      |  |  ┏━━━━┓  |  |      |     |     |      |          |
+             |          |      |     |   | 3.3V |1 |  ┃▣  ◎┃  |2 |5V    |     |     |      |          |
+             |I2C1 SDA1 |      |     |   |GPIO2 |3 |  ┃◎  ◎┃  |4 |5V    |     |     |      |          |
+             |I2C1 SCL1 |      |     |   |GPIO3 |5 |  ┃◎  ◎┃  |6 |GND   |     |     |      |          |
+             |          |      |     |   |GPIO4 |7 |  ┃◎  ◎┃  |8 |GPIO14|     |     |      | TXD0     |
+             |          |      |     |   | GND  |9 |  ┃◎  ◎┃  |10|GPIO15|     |     |      | RXD0     |
+             |          |      |     |   |GPIO17|11|  ┃◎  ◎┃  |12|GPIO18|     |     |PWM 1 |          |
+             |          |      |     |   |GPIO27|13|  ┃◎  ◎┃  |14|GND   |     |     |      |          |
+             |          |      |     |   |GPIO22|15|  ┃◎  ◎┃  |16|GPIO23|     |     |      |          |
+             |          |      |     |   | 3.3V |17|  ┃◎  ◎┃  |18|GPIO24|     |     |      |          |
+             |SPI0 MOSI |      |     |   |GPIO10|19|  ┃◎  ◎┃  |20|GND   |     |     |      |          |
+             |SPI0 MISO |      |     |   |GPIO9 |21|  ┃◎  ◎┃  |22|GPIO25|     |     |      |          |
+             |SPI0 CLK  |      |     |   |GPIO11|23|  ┃◎  ◎┃  |24|GPIO8 |     |     |      |SPI0 CS0  |
+             |          |      |     |   | GND  |25|  ┃◎  ◎┃  |26|GPIO7 |     |     |      |SPI0 CS1  |
+             | ID_SD    |      |     |   |GPIO0 |27|  ┃◎  ◎┃  |28|GPIO1 |     |     |      | ID_SC    |
+             |          |      |     |   |GPIO05|29|  ┃◎  ◎┃  |30|GND   |     |     |      |          |
+             |          |      |     |   |GPIO06|31|  ┃◎  ◎┃  |32|GPIO12|     |     |      |          |
+             |          |      |     |   |GPIO13|33|  ┃◎  ◎┃  |34|GND   |     |     |      |          |
+             |SPI1 MISO | PWM 2|     |   |GPIO19|35|  ┃◎  ◎┃  |36|GPIO16|     |     |PWM 1 |SPI1 CS0  |
+             |          | PWM 2|     |   |GPIO26|37|  ┃◎  ◎┃  |38|GPIO20|     |     |      |SPI1 MOSI |
+             |          |      |     |   | GND  |39|  ┃◎  ◎┃  |40|GPIO21|     |     |      |SPI1_SCLK |
+             |          |      |     |   |      |  |  ┗━━━━┛  |  |      |     |     |      |          |
+""",
 )
 raspberry_pi3 = Pinout(
-    board_name = "Raspberry Pi 3 GPIO header",
+    board_name="Raspberry Pi 3 GPIO header",
     mcu_name="BCM2837A0/B0",
-    ground_pins = [6, 9, 14, 20, 25, 30, 34, 39],
-    power_pins = [1,2,4,17],
-    adc_pins = [], 
-    reset_pins = [],
-    nc_pins = [],
-    columns = ["pin", "analog", "timer", "com", "interrupt"],
-    pinout = """    
-             |         |     |     |   |      |  |  ┏━━━━┓  |  |      |     |     |      |         |  
-             |         |     |     |   | 3.3V |1 |  ┃▣  ◎┃  |2 |5V    |     |     |      |         |  
-             |I2C1 SDA1|     |     |   |GPIO2 |3 |  ┃◎  ◎┃  |4 |5V    |     |     |      |         | 
-             |I2C1 SCL1|     |     |   |GPIO3 |5 |  ┃◎  ◎┃  |6 |GND   |     |     |      |         |  
-             |         |     |     |   |GPIO4 |7 |  ┃◎  ◎┃  |8 |GPIO14|     |     |      | TXD0    |  
-             |         |     |     |   | GND  |9 |  ┃◎  ◎┃  |10|GPIO15|     |     |      | RXD0    |  
-             |         |     |     |   |GPIO17|11|  ┃◎  ◎┃  |12|GPIO18|     |     |PWM 1 |         |  
-             |         |     |     |   |GPIO27|13|  ┃◎  ◎┃  |14|GND   |     |     |      |         |  
-             |         |     |     |   |GPIO22|15|  ┃◎  ◎┃  |16|GPIO23|     |     |      |         |  
-             |         |     |     |   | 3.3V |17|  ┃◎  ◎┃  |18|GPIO24|     |     |      |         |
-             |SPI MOSI |     |     |   |GPIO10|19|  ┃◎  ◎┃  |20|GND   |     |     |      |         |
-             |SPI MISO |     |     |   |GPIO9 |21|  ┃◎  ◎┃  |22|GPIO25|     |     |      |         |
-             |SPI CLK  |     |     |   |GPIO11|23|  ┃◎  ◎┃  |24|GPIO8 |     |     |      |SPI CS0  |
-             |         |     |     |   | GND  |25|  ┃◎  ◎┃  |26|GPIO7 |     |     |      |SPI CS1  |
-             | ID_SD   |     |     |   |GPIO0 |27|  ┃◎  ◎┃  |28|GPIO1 |     |     |      | ID_SC   |
-             |         |     |     |   |GPIO05|29|  ┃◎  ◎┃  |30|GND   |     |     |      |         |   
-             |         |     |     |   |GPIO06|31|  ┃◎  ◎┃  |32|GPIO12|     |     |      |         |   
-             |         |     |     |   |GPIO13|33|  ┃◎  ◎┃  |34|GND   |     |     |      |         |  
-             |SPI1 MISO|PWM 2|     |   |GPIO19|35|  ┃◎  ◎┃  |36|GPIO16|     |     |PWM 1 |SPI1 CS0 |  
-             |         |PWM 2|     |   |GPIO26|37|  ┃◎  ◎┃  |38|GPIO20|     |     |      |SPI1 MOSI|  
-             |         |     |     |   | GND  |39|  ┃◎  ◎┃  |40|GPIO21|     |     |      |SPI1_SCLK|    
-             |         |     |     |   |      |  |  ┗━━━━┛  |  |      |     |     |      |         |    
-"""
+    ground_pins=[6, 9, 14, 20, 25, 30, 34, 39],
+    power_pins=[1, 2, 4, 17],
+    adc_pins=[],
+    reset_pins=[],
+    nc_pins=[],
+    columns=["pin", "analog", "timer", "com", "interrupt"],
+    pinout="""    
+             |          |     |     |   |      |  |  ┏━━━━┓  |  |      |     |     |      |          |
+             |          |     |     |   | 3.3V |1 |  ┃▣  ◎┃  |2 |5V    |     |     |      |          |
+             |I2C1 SDA1 |     |     |   |GPIO2 |3 |  ┃◎  ◎┃  |4 |5V    |     |     |      |          |
+             |I2C1 SCL1 |     |     |   |GPIO3 |5 |  ┃◎  ◎┃  |6 |GND   |     |     |      |          |
+             |          |     |     |   |GPIO4 |7 |  ┃◎  ◎┃  |8 |GPIO14|     |     |      | TXD0     |
+             |          |     |     |   | GND  |9 |  ┃◎  ◎┃  |10|GPIO15|     |     |      | RXD0     |
+             |          |     |     |   |GPIO17|11|  ┃◎  ◎┃  |12|GPIO18|     |     |PWM 1 |          |
+             |          |     |     |   |GPIO27|13|  ┃◎  ◎┃  |14|GND   |     |     |      |          |
+             |          |     |     |   |GPIO22|15|  ┃◎  ◎┃  |16|GPIO23|     |     |      |          |
+             |          |     |     |   | 3.3V |17|  ┃◎  ◎┃  |18|GPIO24|     |     |      |          |
+             |SPI0 MOSI |     |     |   |GPIO10|19|  ┃◎  ◎┃  |20|GND   |     |     |      |          |
+             |SPI0 MISO |     |     |   |GPIO9 |21|  ┃◎  ◎┃  |22|GPIO25|     |     |      |          |
+             |SPI0 CLK  |     |     |   |GPIO11|23|  ┃◎  ◎┃  |24|GPIO8 |     |     |      |SPI0 CS0  |
+             |          |     |     |   | GND  |25|  ┃◎  ◎┃  |26|GPIO7 |     |     |      |SPI0 CS1  |
+             | ID_SD    |     |     |   |GPIO0 |27|  ┃◎  ◎┃  |28|GPIO1 |     |     |      | ID_SC    |
+             |          |     |     |   |GPIO05|29|  ┃◎  ◎┃  |30|GND   |     |     |      |          |
+             |          |     |     |   |GPIO06|31|  ┃◎  ◎┃  |32|GPIO12|     |     |      |          |
+             |          |     |     |   |GPIO13|33|  ┃◎  ◎┃  |34|GND   |     |     |      |          |
+             |SPI1 MISO |PWM 2|     |   |GPIO19|35|  ┃◎  ◎┃  |36|GPIO16|     |     |PWM 1 |SPI1 CS0  |
+             |          |PWM 2|     |   |GPIO26|37|  ┃◎  ◎┃  |38|GPIO20|     |     |      |SPI1 MOSI |
+             |          |     |     |   | GND  |39|  ┃◎  ◎┃  |40|GPIO21|     |     |      |SPI1_SCLK |
+             |          |     |     |   |      |  |  ┗━━━━┛  |  |      |     |     |      |          |
+""",
 )
 
 raspberry_pi2 = Pinout(
-    board_name = "Raspberry Pi 2 GPIO header",
+    board_name="Raspberry Pi 2 GPIO header",
     mcu_name="BCM2836/7",
-    ground_pins = [6, 9, 14, 20, 25, 30, 34, 39],
-    power_pins = [1,2,4,17],
-    adc_pins = [], 
-    reset_pins = [],
-    nc_pins = [],
-    columns = ["pin", "analog", "timer", "com", "interrupt"],
-    pinout = """    
-             |        |      |     |   |      |  |  ┏━━━━┓  |  |       |     |     |      |       | 
-             |        |      |     |   | 3.3V |1 |  ┃▣  ◎┃  |2 | 5V    |     |     |      |       | 
+    ground_pins=[6, 9, 14, 20, 25, 30, 34, 39],
+    power_pins=[1, 2, 4, 17],
+    adc_pins=[],
+    reset_pins=[],
+    nc_pins=[],
+    columns=["pin", "analog", "timer", "com", "interrupt"],
+    pinout="""    
+             |        |      |     |   |      |  |  ┏━━━━┓  |  |       |     |     |      |       |
+             |        |      |     |   | 3.3V |1 |  ┃▣  ◎┃  |2 | 5V    |     |     |      |       |
              | SDA1   |      |     |   |GPIO2 |3 |  ┃◎  ◎┃  |4 | 5V    |     |     |      |       |
-             | SCL1   |      |     |   |GPIO3 |5 |  ┃◎  ◎┃  |6 | GND   |     |     |      |       | 
-             |        |      |     |   |GPIO4 |7 |  ┃◎  ◎┃  |8 | GPIO14|     |     |      | TXD0  | 
-             |        |      |     |   | GND  |9 |  ┃◎  ◎┃  |10| GPIO15|     |     |      | RXD0  | 
-             |        |      |     |   |GPIO17|11|  ┃◎  ◎┃  |12| GPIO18|     |     |      |       | 
-             |        |      |     |   |GPIO27|13|  ┃◎  ◎┃  |14| GND   |     |     |      |       |  
-             |        |      |     |   |GPIO22|15|  ┃◎  ◎┃  |16| GPIO23|     |     |      |       |  
+             | SCL1   |      |     |   |GPIO3 |5 |  ┃◎  ◎┃  |6 | GND   |     |     |      |       |
+             |        |      |     |   |GPIO4 |7 |  ┃◎  ◎┃  |8 | GPIO14|     |     |      | TXD0  |
+             |        |      |     |   | GND  |9 |  ┃◎  ◎┃  |10| GPIO15|     |     |      | RXD0  |
+             |        |      |     |   |GPIO17|11|  ┃◎  ◎┃  |12| GPIO18|     |     |      |       |
+             |        |      |     |   |GPIO27|13|  ┃◎  ◎┃  |14| GND   |     |     |      |       |
+             |        |      |     |   |GPIO22|15|  ┃◎  ◎┃  |16| GPIO23|     |     |      |       |
              |        |      |     |   | 3.3V |17|  ┃◎  ◎┃  |18| GPIO24|     |     |      |       |
              |SPI MOSI|      |     |   |GPIO10|19|  ┃◎  ◎┃  |20| GND   |     |     |      |       |
              |SPI MISO|      |     |   |GPIO9 |21|  ┃◎  ◎┃  |22|GPIO25 |     |     |      |       |
              |SPI CLK |      |     |   |GPIO11|23|  ┃◎  ◎┃  |24|GPIO8  |     |     |      |SPI CE0|
              |        |      |     |   | GND  |25|  ┃◎  ◎┃  |26|GPIO7  |     |     |      |SPI CE1|
              | ID_SD  |      |     |   |GPIO0 |27|  ┃◎  ◎┃  |28|GPIO1  |     |     |      | ID_SC |
-             |        |      |     |   |GPIO05|29|  ┃◎  ◎┃  |30| GND   |     |     |      |       |   
-             |        |      |     |   |GPIO06|31|  ┃◎  ◎┃  |32|GPIO12 |     |     |      |       |   
-             |        |      |     |   |GPIO13|33|  ┃◎  ◎┃  |34| GND   |     |     |      |       |  
-             |        |      |     |   |GPIO19|35|  ┃◎  ◎┃  |36| GPIO16|     |     |      |       |  
-             |        |      |     |   |GPIO26|37|  ┃◎  ◎┃  |38| GPIO20|     |     |      |       |  
-             |        |      |     |   | GND  |39|  ┃◎  ◎┃  |40| GPIO21|     |     |      |       |    
-             |        |      |     |   |      |  |  ┗━━━━┛  |  |       |     |     |      |       |    
-"""
+             |        |      |     |   |GPIO05|29|  ┃◎  ◎┃  |30| GND   |     |     |      |       |
+             |        |      |     |   |GPIO06|31|  ┃◎  ◎┃  |32|GPIO12 |     |     |      |       |
+             |        |      |     |   |GPIO13|33|  ┃◎  ◎┃  |34| GND   |     |     |      |       |
+             |        |      |     |   |GPIO19|35|  ┃◎  ◎┃  |36| GPIO16|     |     |      |       |
+             |        |      |     |   |GPIO26|37|  ┃◎  ◎┃  |38| GPIO20|     |     |      |       |
+             |        |      |     |   | GND  |39|  ┃◎  ◎┃  |40| GPIO21|     |     |      |       |
+             |        |      |     |   |      |  |  ┗━━━━┛  |  |       |     |     |      |       |
+""",
 )
 
 raspberry_pi1_rev1 = Pinout(
-    board_name = "Raspberry Pi 1 GPIO header Rev. 1",
+    board_name="Raspberry Pi 1 GPIO header Rev. 1",
     mcu_name="BCM2835",
-    ground_pins = [6, 9, 14, 20, 25],
-    power_pins = [1,2,4,17],
-    adc_pins = [], 
-    reset_pins = [],
-    nc_pins = [],
-    columns = ["pin", "analog", "timer", "com", "interrupt"],
-    pinout = """    
-        |        |    |    |   |      |  |  ┏━━━━┓  |  |       |    |     |      |        |  
-        |        |    |    |   | 3.3V |1 |  ┃▣  ◎┃  |2 | 5V    |    |     |      |        |  
-        | SDA1   |    |    |   |GPIO0 |3 |  ┃◎  ◎┃  |4 | 5V    |    |     |      |        | 
-        | SCL1   |    |    |   |GPIO1 |5 |  ┃◎  ◎┃  |6 | GND   |    |     |      |        |  
-        |        |    |    |   |GPIO4 |7 |  ┃◎  ◎┃  |8 | GPIO14|    |     |      | TXD0   |  
-        |        |    |    |   | GND  |9 |  ┃◎  ◎┃  |10| GPIO15|    |     |      | RXD0   |  
-        |        |    |    |   |GPIO17|11|  ┃◎  ◎┃  |12| GPIO18|    |     |      |        |  
-        |        |    |    |   |GPIO21|13|  ┃◎  ◎┃  |14| GND   |    |     |      |        |  
-        |        |    |    |   |GPIO22|15|  ┃◎  ◎┃  |16| GPIO23|    |     |      |        |  
+    ground_pins=[6, 9, 14, 20, 25],
+    power_pins=[1, 2, 4, 17],
+    adc_pins=[],
+    reset_pins=[],
+    nc_pins=[],
+    columns=["pin", "analog", "timer", "com", "interrupt"],
+    pinout="""    
+        |        |    |    |   |      |  |  ┏━━━━┓  |  |       |    |     |      |        |
+        |        |    |    |   | 3.3V |1 |  ┃▣  ◎┃  |2 | 5V    |    |     |      |        |
+        | SDA1   |    |    |   |GPIO0 |3 |  ┃◎  ◎┃  |4 | 5V    |    |     |      |        |
+        | SCL1   |    |    |   |GPIO1 |5 |  ┃◎  ◎┃  |6 | GND   |    |     |      |        |
+        |        |    |    |   |GPIO4 |7 |  ┃◎  ◎┃  |8 | GPIO14|    |     |      | TXD0   |
+        |        |    |    |   | GND  |9 |  ┃◎  ◎┃  |10| GPIO15|    |     |      | RXD0   |
+        |        |    |    |   |GPIO17|11|  ┃◎  ◎┃  |12| GPIO18|    |     |      |        |
+        |        |    |    |   |GPIO21|13|  ┃◎  ◎┃  |14| GND   |    |     |      |        |
+        |        |    |    |   |GPIO22|15|  ┃◎  ◎┃  |16| GPIO23|    |     |      |        |
         |        |    |    |   | 3.3V |17|  ┃◎  ◎┃  |18| GPIO24|    |     |      |        |
         |SPI MOSI|    |    |   |GPIO10|19|  ┃◎  ◎┃  |20| GND   |    |     |      |        |
         |SPI MISO|    |    |   |GPIO9 |21|  ┃◎  ◎┃  |22|GPIO25 |    |     |      |        |
         |SPI CLK |    |    |   |GPIO11|23|  ┃◎  ◎┃  |24|GPIO8  |    |     |      |SPI CE0 |
-        |        |    |    |   | GND  |25|  ┃◎  ◎┃  |26|GPIO7  |    |     |      |SPI CE1 |   
-        |        |    |    |   |      |  |  ┗━━━━┛  |  |       |    |     |      |        |    
-"""
+        |        |    |    |   | GND  |25|  ┃◎  ◎┃  |26|GPIO7  |    |     |      |SPI CE1 |
+        |        |    |    |   |      |  |  ┗━━━━┛  |  |       |    |     |      |        |
+""",
 )
 
 raspberry_pi1_rev2 = Pinout(
-    board_name = "Raspberry Pi 1 GPIO header Rev. 2",
+    board_name="Raspberry Pi 1 GPIO header Rev. 2",
     mcu_name="BCM2835",
-    ground_pins = [6, 9, 14, 20, 25],
-    power_pins = [1,2,4,17],
-    adc_pins = [], 
-    reset_pins = [],
-    nc_pins = [],
-    columns = ["pin", "analog", "timer", "com", "interrupt"],
-    pinout = """    
-             |        |        |     |   |      |  |  ┏━━━━┓  |  |       |      |      |          |          |  
-             |        |        |     |   | 3.3V |1 |  ┃▣  ◎┃  |2 | 5V    |      |      |          |          |  
-             | SDA1   |        |     |   |GPIO2 |3 |  ┃◎  ◎┃  |4 | 5V    |      |      |          |          | 
-             | SCL1   |        |     |   |GPIO3 |5 |  ┃◎  ◎┃  |6 | GND   |      |      |          |          |  
-             |        |        |     |   |GPIO4 |7 |  ┃◎  ◎┃  |8 | GPIO14|      |      |          | TXD0     |  
-             |        |        |     |   | GND  |9 |  ┃◎  ◎┃  |10| GPIO15|      |      |          | RXD0     |  
-             |        |        |     |   |GPIO17|11|  ┃◎  ◎┃  |12| GPIO18|      |      |          |          |  
-             |        |        |     |   |GPIO27|13|  ┃◎  ◎┃  |14| GND   |      |      |          |          |  
-             |        |        |     |   |GPIO22|15|  ┃◎  ◎┃  |16| GPIO23|      |      |          |          |  
+    ground_pins=[6, 9, 14, 20, 25],
+    power_pins=[1, 2, 4, 17],
+    adc_pins=[],
+    reset_pins=[],
+    nc_pins=[],
+    columns=["pin", "analog", "timer", "com", "interrupt"],
+    pinout="""
+             |        |        |     |   |      |  |  ┏━━━━┓  |  |       |      |      |          |          |
+             |        |        |     |   | 3.3V |1 |  ┃▣  ◎┃  |2 | 5V    |      |      |          |          |
+             | SDA1   |        |     |   |GPIO2 |3 |  ┃◎  ◎┃  |4 | 5V    |      |      |          |          |
+             | SCL1   |        |     |   |GPIO3 |5 |  ┃◎  ◎┃  |6 | GND   |      |      |          |          |
+             |        |        |     |   |GPIO4 |7 |  ┃◎  ◎┃  |8 | GPIO14|      |      |          | TXD0     |
+             |        |        |     |   | GND  |9 |  ┃◎  ◎┃  |10| GPIO15|      |      |          | RXD0     |
+             |        |        |     |   |GPIO17|11|  ┃◎  ◎┃  |12| GPIO18|      |      |          |          |
+             |        |        |     |   |GPIO27|13|  ┃◎  ◎┃  |14| GND   |      |      |          |          |
+             |        |        |     |   |GPIO22|15|  ┃◎  ◎┃  |16| GPIO23|      |      |          |          |
              |        |        |     |   | 3.3V |17|  ┃◎  ◎┃  |18| GPIO24|      |      |          |          |
              |SPI MOSI|        |     |   |GPIO10|19|  ┃◎  ◎┃  |20| GND   |      |      |          |          |
              |SPI MISO|        |     |   |GPIO9 |21|  ┃◎  ◎┃  |22|GPIO25 |      |      |          |          |
              |SPI CLK |        |     |   |GPIO11|23|  ┃◎  ◎┃  |24|GPIO8  |      |      |          |SPI CE0   |
-             |        |        |     |   | GND  |25|  ┃◎  ◎┃  |26|GPIO7  |      |      |          |SPI CE1   |   
-             |        |        |     |   |      |  |  ┗━━━━┛  |  |       |      |      |          |          |    
-"""
+             |        |        |     |   | GND  |25|  ┃◎  ◎┃  |26|GPIO7  |      |      |          |SPI CE1   |
+             |        |        |     |   |      |  |  ┗━━━━┛  |  |       |      |      |          |          |
+""",
 )
 
 blue_pill = Pinout(
-    board_name = "Blue pill",
-    mcu_name = "STM32F103C6T6/STM32F103C8T6",
-    ground_pins = [19, 20, 39, 43],
-    power_pins = [1, 18, 38, 40, 41],
-    reset_pins = [17],
-    columns = ["pin", "analog", "pwm", "com", "interrupt"],
-    pinout = """
-             |     |     |       |     |     |  |     ┏━━━━━┓     |  |      |      |      |    |       |         
-             |     |     |       |     |     |  |┏━━━━┫ USB ┣━━━━┓|  |      |      |      |    |       |             
-             |     |     |       |     |PB12 |21|┃◎   ┗━━━━━┛   ▣┃|20| GND  |      |      |    |       |   
-             |     |     |       |     |PB13 |22|┃◎             ▣┃|19| GND  |      |      |    |       |   
-             |     |     |       |     |PB14 |23|┃◎             ◎┃|18| 3V3  |      |      |    |       |   
-             |     |     |       |     |PB15 |24|┃◎             ◎┃|17|RESET |      |      |    |       |   
-             |     |CK1  |       |     |PA8  |25|┃◎             ◎┃|16| PB11 |      |      |RX3 | SDA2  |   
-             |     |TX1  |       |     |PA9  |26|┃◎             ◎┃|15| PB10 |      |      |TX3 | SCL2  |   
-             |     |RX1  |       |     |PA10 |27|┃◎             ◎┃|14| PB1  | ADC9 |      |    |       |   
-        USB- |     |CTS1 |       |     |PA11 |28|┃◎             ◎┃|13| PB0  | ADC8 |      |    |       |   
-        USB+ |     |RTS1 |       |     |PA12 |29|┃◎             ◎┃|12| PA7  | ADC7 |      |    |       | MOSI1  
-             |     |     |       |     |PA15 |30|┃◎             ◎┃|11| PA6  | ADC6 |      |    |       | MISO1  
-             |     |     |       |     |PB3  |31|┃◎             ◎┃|10| PA5  | ADC5 |      |    |       | SCK1 
-             |     |     |       |     |PB4  |32|┃◎             ◎┃| 9| PA4  | ADC4 |      |CK2 |       | NSS1 
-             |     |     |       |     |PB5  |33|┃◎             ◎┃| 8| PA3  | ADC3 |      |RX2 |       |  
-             |     |TX1  |       |     |PB6  |34|┃◎             ◎┃| 7| PA2  | ADC2 |      |TX2 |       |  
-             |     |RX1  |       |     |PB7  |35|┃◎             ◎┃| 6| PA1  | ADC1 |      |RTS2|       |  
-             |     |CANRX|       |     |PB8  |36|┃◎             ◎┃| 5| PA0  | ADC0 |      |CTS2|       |  
-             |     |CANTX|       |     |PB9  |37|┃◎             ◎┃| 4| PC15 |      |      |    |       |         
-             |     |     |       |     |  5V |38|┃◎             ◎┃| 3| PC14 |      |      |    |       |  
-             |     |     |       |     | GND |39|┃▣        [LED]◎┃| 2| PC13 |      |      |    |       |  
-             |     |     |       |     | 3V3 |40|┃◎   ◎ ◎ ◎ ▣   ◎┃| 1|VBAT  |      |      |    |       |  
-             |     |     |       |     |     |  |┗━━━━╋━╋━╋━╋━━━━┛|  |      |      |      |    |       |         
-             |     |     |       |     | 3V3 |41| ━━━━┛ ┃ ┃ ┗━━━━━|43|GND   |      |      |    |       |         
-             |     |     |       |     | PA13|42| ━━━━━━┛ ┗━━━━━━━|44| PA14 |      |      |    |       |               
-"""
+    board_name="Blue pill",
+    mcu_name="STM32F103C6T6/STM32F103C8T6",
+    ground_pins=[19, 20, 39, 43],
+    power_pins=[1, 18, 38, 40, 41],
+    reset_pins=[17],
+    columns=["pin", "analog", "pwm", "com", "interrupt"],
+    pinout="""
+             |     |     |       |     |     |  |     ┏━━━━━┓     |  |      |      |      |    |       |
+             |     |     |       |     |     |  |┏━━━━┫ USB ┣━━━━┓|  |      |      |      |    |       |
+             |     |     |       |     |PB12 |21|┃◎   ┗━━━━━┛   ▣┃|20| GND  |      |      |    |       |
+             |     |     |       |     |PB13 |22|┃◎             ▣┃|19| GND  |      |      |    |       |
+             |     |     |       |     |PB14 |23|┃◎             ◎┃|18| 3V3  |      |      |    |       |
+             |     |     |       |     |PB15 |24|┃◎             ◎┃|17|RESET |      |      |    |       |
+             |     |CK1  |       |     |PA8  |25|┃◎             ◎┃|16| PB11 |      |      |RX3 | SDA2  |
+             |     |TX1  |       |     |PA9  |26|┃◎             ◎┃|15| PB10 |      |      |TX3 | SCL2  |
+             |     |RX1  |       |     |PA10 |27|┃◎             ◎┃|14| PB1  | ADC9 |      |    |       |
+        USB- |     |CTS1 |       |     |PA11 |28|┃◎             ◎┃|13| PB0  | ADC8 |      |    |       |
+        USB+ |     |RTS1 |       |     |PA12 |29|┃◎             ◎┃|12| PA7  | ADC7 |      |    |       | MOSI1
+             |     |     |       |     |PA15 |30|┃◎             ◎┃|11| PA6  | ADC6 |      |    |       | MISO1
+             |     |     |       |     |PB3  |31|┃◎             ◎┃|10| PA5  | ADC5 |      |    |       | SCK1
+             |     |     |       |     |PB4  |32|┃◎             ◎┃| 9| PA4  | ADC4 |      |CK2 |       | NSS1
+             |     |     |       |     |PB5  |33|┃◎             ◎┃| 8| PA3  | ADC3 |      |RX2 |       |
+             |     |TX1  |       |     |PB6  |34|┃◎             ◎┃| 7| PA2  | ADC2 |      |TX2 |       |
+             |     |RX1  |       |     |PB7  |35|┃◎             ◎┃| 6| PA1  | ADC1 |      |RTS2|       |
+             |     |CANRX|       |     |PB8  |36|┃◎             ◎┃| 5| PA0  | ADC0 |      |CTS2|       |
+             |     |CANTX|       |     |PB9  |37|┃◎             ◎┃| 4| PC15 |      |      |    |       |
+             |     |     |       |     |  5V |38|┃◎             ◎┃| 3| PC14 |      |      |    |       |
+             |     |     |       |     | GND |39|┃▣        [LED]◎┃| 2| PC13 |      |      |    |       |
+             |     |     |       |     | 3V3 |40|┃◎   ◎ ◎ ◎ ▣   ◎┃| 1|VBAT  |      |      |    |       |
+             |     |     |       |     |     |  |┗━━━━╋━╋━╋━╋━━━━┛|  |      |      |      |    |       |
+             |     |     |       |     | 3V3 |41| ━━━━┛ ┃ ┃ ┗━━━━━|43|GND   |      |      |    |       |
+             |     |     |       |     | PA13|42| ━━━━━━┛ ┗━━━━━━━|44| PA14 |      |      |    |       |
+""",
 )
 
 # Code -----------------------------------------------------------------------
+
+print_help: bool = True
 
 
 def print_pinout(pinout):
@@ -648,7 +659,7 @@ def print_pinout(pinout):
     opts_show = pinout.columns
     opts_find = None
     opts_pins = True
-    opts_hide_gpio = False 
+    opts_hide_gpio = False
     for label in reversed(opts_show):
         grid.add_column(justify="left", style=THEME[label], no_wrap=True)
         show_indexes.append(list(reversed(pinout.columns)).index(label))
@@ -679,49 +690,58 @@ def print_pinout(pinout):
     for row in pinout.split():
         grid.add_row(*pinout.build_row(row, show_indexes, find=opts_find))
 
-
     layout = Table.grid(expand=True)
     layout.add_row(grid)
     layout.add_row(f"MCU: {pinout.mcu_name}")
 
+    print(Panel(layout, title=pinout.board_name, expand=False, style=THEME["panel"]))
 
-    print(Panel(
-        layout,
-        title=pinout.board_name,
-        expand=False,
-        style=THEME["panel"]))
-    
+    global print_help
+    print_help = False
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
-        prog=App.NAME,
-        description=App.DESCRIPTION,
-        epilog="",
-        add_help=True)
-    
-    parser.add_argument("--pro", action="store_true", default=False,
-                        help="Arduino Pro mini")
-    parser.add_argument("--nano", action="store_true", default=False,
-                        help="Arduino nano")
-    parser.add_argument("--uno", action="store_true", default=False,
-                        help="Arduino Uno")
-    parser.add_argument("--mega", action="store_true", default=False,
-                        help="Arduino mega")
-    parser.add_argument("--et", action="store_true", default=False,
-                        help="ET-AVR Stamp (ATMega128)")
-    parser.add_argument("--pico", action="store_true", default=False,
-                        help="Raspberry Pi Pico")
-    parser.add_argument("--pi1", action="store_true", default=False,
-                        help="Raspberry Pi1 GPIO header")
-    parser.add_argument("--pi2", action="store_true", default=False,
-                        help="Raspberry Pi2 GPIO header")
-    parser.add_argument("--pi3", action="store_true", default=False,
-                        help="Raspberry Pi3 GPIO header")
-    parser.add_argument("--bp", action="store_true", default=False,
-                        help="Blue Pill (STM32)")
-    parser.add_argument("--debug", action="store_true", default=False,
-                        help="Print debug messages")
-    parser.add_argument("--version", action="store_true",
-                        help="Print version information")
+        prog=App.NAME, description=App.DESCRIPTION, epilog="", add_help=True
+    )
+
+    parser.add_argument(
+        "--pro", action="store_true", default=False, help="Arduino Pro mini"
+    )
+    parser.add_argument(
+        "--nano", action="store_true", default=False, help="Arduino nano"
+    )
+    parser.add_argument("--uno", action="store_true", default=False, help="Arduino Uno")
+    parser.add_argument(
+        "--mega", action="store_true", default=False, help="Arduino mega"
+    )
+    parser.add_argument(
+        "--et", action="store_true", default=False, help="ET-AVR Stamp (ATMega128)"
+    )
+    parser.add_argument(
+        "--pico", action="store_true", default=False, help="Raspberry Pi Pico"
+    )
+    parser.add_argument(
+        "--pi1", action="store_true", default=False, help="Raspberry Pi1 GPIO header"
+    )
+    parser.add_argument(
+        "--pi2", action="store_true", default=False, help="Raspberry Pi2 GPIO header"
+    )
+    parser.add_argument(
+        "--pi3", action="store_true", default=False, help="Raspberry Pi3 GPIO header"
+    )
+    parser.add_argument(
+        "--pi4", action="store_true", default=False, help="Raspberry Pi4 GPIO header"
+    )
+    parser.add_argument(
+        "--bp", action="store_true", default=False, help="Blue Pill (STM32)"
+    )
+    parser.add_argument(
+        "--debug", action="store_true", default=False, help="Print debug messages"
+    )
+    parser.add_argument(
+        "--version", action="store_true", help="Print version information"
+    )
     args = parser.parse_args()
 
     if args.version:
@@ -738,11 +758,11 @@ def main() -> None:
 
     if args.uno:
         print_pinout(arduino_uno)
-    
+
     if args.mega:
         print_pinout(arduino_mega)
         print_pinout(arduino_mega_con)
-    
+
     if args.et:
         print_pinout(ET_AVR_STAMP)
 
@@ -752,23 +772,30 @@ def main() -> None:
 
     if args.pi2:
         print_pinout(raspberry_pi2)
-    
+
     if args.pi3:
         print_pinout(raspberry_pi3)
 
+    if args.pi4:
+        print_pinout(raspberry_pi4)
+
     if args.bp:
         print_pinout(blue_pill)
+
+    if print_help is True:
+        parser.print_help()
+
 
 if __name__ == "__main__":
     try:
         main()
         sys.exit(0)
-    except KeyboardInterrupt as e: # Ctrl-C
+    except KeyboardInterrupt as e:  # Ctrl-C
         raise e
-    except SystemExit as e:        # sys.exit()
+    except SystemExit as e:  # sys.exit()
         raise e
     except Exception as e:
-        print('ERROR, UNEXPECTED EXCEPTION')
+        print("ERROR, UNEXPECTED EXCEPTION")
         print(str(e))
         traceback.print_exc()
         os._exit(1)
